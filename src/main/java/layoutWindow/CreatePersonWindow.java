@@ -1,4 +1,7 @@
+package layoutWindow;
+
 import controllers.CreateNewPersonController;
+import controllers.NewUserListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -8,7 +11,6 @@ import utils.KeepDataHelper;
 
 import java.awt.*;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,18 +18,17 @@ import static java.util.Objects.requireNonNull;
 import static utils.FileHelper.getTruePathURL;
 
 public class CreatePersonWindow {
+    private NewUserListener listener;
 
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
         Pane content = loader.load(requireNonNull(getTruePathURL("src/main/layouts/NewPerson.fxml")).openStream());
         CreateNewPersonController createNewPersonController = loader.getController();
         createNewPersonController.setDataHelper(dataHelper);
-        try {
-            List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
-            createNewPersonController.setEventsList(allEvents);
-        } catch (SQLException e) {
-            System.out.println("Ошибка чтения списка мероприятий: " + e.getMessage());
-        }
+        // передаем событие - создан новый пользователь
+        createNewPersonController.addNewPersonListener(() -> listener.newUserHasBeenCreated());
+        List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
+        createNewPersonController.setEventsList(allEvents);
 
         BorderPane root = new BorderPane();
         root.setCenter(content);
@@ -38,5 +39,9 @@ public class CreatePersonWindow {
         stage.setResizable(false);
         stage.setTitle("Добавление нового человека");
         stage.show();
+    }
+
+    public void addNewPersonListener(NewUserListener evtListener) {
+        this.listener = evtListener;
     }
 }

@@ -9,7 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static tables.Table.appendWithDelimiter;
 
@@ -64,18 +66,53 @@ public class People implements Table {
 
     /**
      * @return всех людей из таблицы
-     * @throws SQLException
      */
-    public List<Person> getAllPeople() throws SQLException {
-        Statement statement = conn.createStatement();
-        ResultSet peopleResultSet = statement.executeQuery("Select * from " + getTableName() + ";");
+    public List<Person> getAllPeople() {
         List<Person> people = new ArrayList<>();
-        while (peopleResultSet.next()) {
-            Person person = getPersonFromResultSet(peopleResultSet);
-            people.add(person);
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet peopleResultSet = statement.executeQuery("Select * from " + getTableName() + ";");
+
+            while (peopleResultSet.next()) {
+                Person person = getPersonFromResultSet(peopleResultSet);
+                people.add(person);
+            }
+            statement.close();
+            peopleResultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        statement.close();
-        peopleResultSet.close();
+        return people;
+    }
+
+    public List<Person> getPeopleById(@NonNull Set<Integer> peopleId) {
+        List<Person> people = new ArrayList<>();
+        if (!peopleId.isEmpty()) {
+            StringBuilder SQLBuilder = new StringBuilder("select * from " + getTableName() +
+                    " where " + id + " in (");
+            for (int i = 0; i < peopleId.size(); i++) {
+                SQLBuilder.append("?,");
+            }
+            SQLBuilder.deleteCharAt(SQLBuilder.length() - 1).append(")");
+            String SQL = SQLBuilder.toString() + ";";
+
+            try {
+                PreparedStatement statement = conn.prepareStatement(SQL);
+                int i = 1;
+                for (Integer id : peopleId) {
+                    statement.setInt(i++, id);
+                }
+                ResultSet peopleResultSet = statement.executeQuery();
+                while (peopleResultSet.next()) {
+                    Person person = getPersonFromResultSet(peopleResultSet);
+                    people.add(person);
+                }
+                statement.close();
+                peopleResultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         return people;
     }
 
@@ -138,5 +175,52 @@ public class People implements Table {
                 appendWithDelimiter(company) +
                 appendWithDelimiter(role) +
                 appendWithDelimiter(description);
+    }
+
+    @NonNull
+    public List<String> getAllCompanies() {
+        List<String> companies = new ArrayList<>();
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet companiesResultSet = statement.executeQuery("Select distinct " + company + " from " + getTableName() + ";");
+            while (companiesResultSet.next()) {
+                companies.add(companiesResultSet.getString(company));
+            }
+            statement.close();
+            companiesResultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return companies;
+    }
+
+    @NonNull
+    public Set<Integer> getPeopleIdByCompanies(@NonNull List<String> companies) {
+        Set<Integer> peopleId = new HashSet<>();
+        StringBuilder SQLBuilder = new StringBuilder("Select distinct " + id + " from " + getTableName());
+        if (!companies.isEmpty()) {
+            SQLBuilder.append(" where " + company + " in (");
+            for (int i = 0; i < companies.size(); i++) {
+                SQLBuilder.append("?,");
+            }
+            SQLBuilder.deleteCharAt(SQLBuilder.length() - 1).append(")");
+        }
+        String SQL = SQLBuilder.toString() + ";";
+
+        try {
+            PreparedStatement statement = conn.prepareStatement(SQL);
+            for (int i = 0; i < companies.size(); i++) {
+                statement.setString(i + 1, companies.get(i));
+            }
+            ResultSet peopleIdResultSet = statement.executeQuery();
+            while (peopleIdResultSet.next()) {
+                peopleId.add(peopleIdResultSet.getInt(id));
+            }
+            statement.close();
+            peopleIdResultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return peopleId;
     }
 }

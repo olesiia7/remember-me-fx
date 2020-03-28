@@ -46,13 +46,13 @@ import static utils.FileHelper.getTruePath;
 import static utils.ImageUtils.getPictureFromClipboard;
 
 public class CreateNewPersonController {
-    public ContextMenu eventsSuggester;
     private KeepDataHelper dataHelper;
     private List<String> allEvents;
 
     public ScrollPane scrollPane;
     public TextField name;
     public TextField events;
+    public ContextMenu eventsSuggester;
     public TextField company;
     public TextField role;
     public TextArea description;
@@ -63,6 +63,7 @@ public class CreateNewPersonController {
     public Button cancel;
     public HBox hBox;
 
+    private NewUserListener listener;
     public void setDataHelper(KeepDataHelper dataHelper) {
         this.dataHelper = dataHelper;
     }
@@ -88,6 +89,10 @@ public class CreateNewPersonController {
                 company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
         try {
             dataHelper.savePersonAndGetId(person);
+            // уведомить, что создан новый человек
+            if (listener != null) {
+                listener.newUserHasBeenCreated();
+            }
         } catch (SQLException e) {
             System.out.println("Ошибки при записи в файл");
             e.printStackTrace();
@@ -274,5 +279,9 @@ public class CreateNewPersonController {
         textFilter.setFill(Color.ORANGE);
         textFilter.setFont(Font.font("Helvetica", FontWeight.BOLD, 12));
         return new TextFlow(textBefore, textFilter, textAfter);
+    }
+
+    public void addNewPersonListener(NewUserListener evtListener) {
+        this.listener = evtListener;
     }
 }

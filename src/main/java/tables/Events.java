@@ -66,18 +66,21 @@ public class Events implements Table {
 
     /**
      * @return весь список существующих мероприятий
-     * @throws SQLException
      */
-    public List<String> getAllEvents() throws SQLException {
-        Statement statement = conn.createStatement();
-        String SQL = "Select " + name + " from " + getTableName() + ";";
-        ResultSet resultSet = statement.executeQuery(SQL);
+    public List<String> getAllEvents() {
         List<String> allEvents = new ArrayList<>();
-        while (resultSet.next()) {
-            allEvents.add(resultSet.getString(name));
+        try {
+            Statement statement = conn.createStatement();
+            String SQL = "Select " + name + " from " + getTableName() + " order by " + name + ";";
+            ResultSet resultSet = statement.executeQuery(SQL);
+            while (resultSet.next()) {
+                allEvents.add(resultSet.getString(name));
+            }
+            statement.close();
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        statement.close();
-        resultSet.close();
         return allEvents;
     }
 

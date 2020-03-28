@@ -61,15 +61,20 @@ public class Pictures implements Table {
         }
     }
 
-    public List<String> getPersonPictures(int personId) throws SQLException {
+    public List<String> getPersonPictures(int personId) {
         List<String> pictures = new ArrayList<>();
         String SQL = "select " + path + " from " + getTableName() + " where " + person_id + "=?";
-        PreparedStatement ps = conn.prepareStatement(SQL);
-        ps.setInt(1, personId);
-        ResultSet resultSet = ps.executeQuery();
-        while (resultSet.next()) {
-            pictures.add(resultSet.getString(path));
+        try {
+            PreparedStatement ps = conn.prepareStatement(SQL);
+            ps.setInt(1, personId);
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                pictures.add(resultSet.getString(path));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         return pictures;
     }
 

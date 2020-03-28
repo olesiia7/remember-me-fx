@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,20 +35,13 @@ public class KeepDataHelper {
     }
 
     /**
-     * Создает таблицы, если они не существуют, и берет из них данные
+     * Берет данные из таблиц
      *
      * @return список людей, записанных в БД
      * @throws SQLException
      */
     @NonNull
-    public List<Person> getSavedPeople() throws SQLException {
-        // Тестовое
-//         dropAllTables();
-        peopleTable.createTableIfNotExist();
-        picturesTable.createTableIfNotExist();
-        eventsTable.createTableIfNotExist();
-        eventsAndPeopleTable.createTableIfNotExist();
-
+    public List<Person> getSavedPeople() {
         List<Person> allPeople = peopleTable.getAllPeople();
         for (Person person : allPeople) {
             // получаем изображения по каждому человеку
@@ -59,8 +53,51 @@ public class KeepDataHelper {
         return allPeople;
     }
 
-    public List<String> getAllEvents() throws SQLException {
+    /**
+     * Создает таблицы, если они не существуют
+     *
+     * @throws SQLException
+     */
+    public void createTablesIfNotExists(boolean dropAll) throws SQLException {
+        if (dropAll) {
+            dropAllTables();
+        }
+        peopleTable.createTableIfNotExist();
+        picturesTable.createTableIfNotExist();
+        eventsTable.createTableIfNotExist();
+        eventsAndPeopleTable.createTableIfNotExist();
+    }
+
+    /**
+     * @return список всех мероприятий
+     */
+    public List<String> getAllEvents() {
         return eventsTable.getAllEvents();
+    }
+
+    /**
+     * @return список всех мест работ
+     */
+    @NonNull
+    public List<String> getAllCompanies() {
+        return peopleTable.getAllCompanies();
+    }
+
+    /**
+     * @param events    список мероприятий, должно быть совпадение хотя бы по одному
+     * @param companies список мест работ, должно быть совпадение хотя бы по одному
+     * @return список людей, кто имеет совпадения и по мероприятиям, и по компаниям
+     */
+    public List<Person> getPeopleByCriteria(@NonNull List<String> events, @NonNull List<String> companies) {
+        Set<Integer> peopleId = new HashSet<>(eventsAndPeopleTable.getPeopleByEvents(events));
+        Set<Integer> peopleByCompanies = peopleTable.getPeopleIdByCompanies(companies);
+        peopleId.retainAll(peopleByCompanies);
+        List<Person> selectedPeople = peopleTable.getPeopleById(peopleId);
+        for (Person person : selectedPeople) {
+            person.setPictures(picturesTable.getPersonPictures(person.getId()));
+            person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+        }
+        return selectedPeople;
     }
 
     /**
