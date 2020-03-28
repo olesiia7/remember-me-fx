@@ -20,18 +20,3 @@ public class Menu extends Application {
         stage.show();
     }
 }
-
-//        final ObservableList<String> strings = FXCollections.observableArrayList();
-//        for (int i = 0; i <= 100; i++) {
-//            strings.add("Item " + i);
-//        }
-//
-//        final CheckComboBox<String> checkComboBox = new CheckComboBox<>(strings);
-//        checkComboBox.getCheckModel().getCheckedItems().addListener(new ListChangeListener<String>() {
-//            public void onChanged(ListChangeListener.Change<? extends String> c) {
-//                System.out.println(checkComboBox.getCheckModel().getCheckedItems());
-//            }
-//        });
-//
-//        vBox.getChildren().add(checkComboBox);
-//        stage.show();
