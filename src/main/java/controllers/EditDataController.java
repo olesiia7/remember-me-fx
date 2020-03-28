@@ -154,27 +154,21 @@ public class EditDataController {
     private CheckComboBox<String> getEventsFilter() {
         final ObservableList<String> allEvents = FXCollections.observableArrayList();
         allEvents.addAll(dataHelper.getAllEvents());
-
-        final CheckComboBox<String> checkComboBox = new CheckComboBox<>(allEvents);
-        final ObservableList<String> choisenEvents = checkComboBox.getCheckModel().getCheckedItems();
-        choisenEvents.addListener((ListChangeListener<String>) c -> {
-            eventsFilterList.clear();
-            eventsFilterList.addAll(choisenEvents);
-            setData(dataHelper.getPeopleByCriteria(eventsFilterList, companiesFilterList));
-        });
-        checkComboBox.setPrefWidth(240);
-        return checkComboBox;
+        return getCheckComboBox(allEvents, eventsFilterList);
     }
 
     private CheckComboBox<String> getCompaniesFilter() {
         final ObservableList<String> allCompanies = FXCollections.observableArrayList();
         allCompanies.addAll(dataHelper.getAllCompanies());
+        return getCheckComboBox(allCompanies, companiesFilterList);
+    }
 
+    private CheckComboBox<String> getCheckComboBox(ObservableList<String> allCompanies, List<String> filterList) {
         final CheckComboBox<String> checkComboBox = new CheckComboBox<>(allCompanies);
         final ObservableList<String> chosenCompanies = checkComboBox.getCheckModel().getCheckedItems();
         chosenCompanies.addListener((ListChangeListener<String>) c -> {
-            companiesFilterList.clear();
-            companiesFilterList.addAll(chosenCompanies);
+            filterList.clear();
+            filterList.addAll(chosenCompanies);
             setData(dataHelper.getPeopleByCriteria(eventsFilterList, companiesFilterList));
         });
         checkComboBox.setPrefWidth(240);
