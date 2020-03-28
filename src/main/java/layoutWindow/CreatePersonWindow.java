@@ -10,23 +10,25 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static utils.FileHelper.getTruePathURL;
 
 public class CreatePersonWindow {
     private NewUserListener listener;
 
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
-        Pane content = loader.load(requireNonNull(getTruePathURL("src/main/layouts/NewPerson.fxml")).openStream());
+        Pane content = loader.load(requireNonNull(new File("src/main/layouts/NewPerson.fxml").toURI().toURL()).openStream());
         CreateNewPersonController createNewPersonController = loader.getController();
         createNewPersonController.setDataHelper(dataHelper);
         // передаем событие - создан новый пользователь
-        createNewPersonController.addNewPersonListener(() -> listener.newUserHasBeenCreated());
+        createNewPersonController.addNewPersonListener(() -> {
+            if (listener != null) listener.newUserHasBeenCreated();
+        });
         List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
         createNewPersonController.setEventsList(allEvents);
 

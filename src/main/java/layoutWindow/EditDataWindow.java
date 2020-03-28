@@ -9,15 +9,15 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
-import static utils.FileHelper.getTruePathURL;
 
 public class EditDataWindow {
     public EditDataWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
-        TabPane content = loader.load(requireNonNull(getTruePathURL("src/main/layouts/EditData.fxml")).openStream());
+        TabPane content = loader.load(requireNonNull(new File("src/main/layouts/EditData.fxml").toURI().toURL().openStream()));
         EditDataController editDataController = loader.getController();
         editDataController.setDataHelper(dataHelper);
         editDataController.setDataFirstTime(dataHelper.getSavedPeople());

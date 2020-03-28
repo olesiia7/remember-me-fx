@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static utils.FileHelper.getTruePath;
 
 public class InitialFX extends Application {
     private static final List<Person> savedPeople = new ArrayList<>();
@@ -65,7 +64,7 @@ public class InitialFX extends Application {
         savedPeople.stream()
                 .map(Person::getPictures)
                 .forEach(existPic::addAll);
-        File dir = new File(getTruePath("src/main/java/resources"));
+        File dir = new File("src/main/java/resources");
         File[] arrFiles = dir.listFiles();
         if (arrFiles != null) {
             List<String> redundantPic = Arrays.stream(arrFiles)

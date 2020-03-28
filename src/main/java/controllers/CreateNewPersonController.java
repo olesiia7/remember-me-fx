@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
 import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
-import static utils.FileHelper.getTruePath;
 import static utils.ImageUtils.getPictureFromClipboard;
 
 public class CreateNewPersonController {
@@ -118,7 +117,7 @@ public class CreateNewPersonController {
     private void setSampleImages() {
         for (int i = 1; i < 3; i++) {
             try {
-                Image image = new Image(new FileInputStream(getTruePath("src/main/resources/sample" + i + ".jpg")));
+                Image image = new Image(new FileInputStream("src/main/resources/sample" + i + ".jpg"));
                 VBox imageLayout = getImageLayout(image);
                 hBox.getChildren().addAll(imageLayout);
             } catch (FileNotFoundException e) {
@@ -198,7 +197,7 @@ public class CreateNewPersonController {
     public List<String> saveImagesToComputer() {
         List<String> paths = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
-        File filePath = new File(getTruePath("src/main/java/resources"));
+        File filePath = new File("src/main/java/resources");
         filePath.mkdir();
         int i = 0;
         List<Image> chosenImages = hBox.getChildren().stream()
