@@ -3,8 +3,12 @@ package controllers;
 import entities.Person;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -13,6 +17,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
@@ -37,7 +46,9 @@ import static utils.FileHelper.getTruePath;
 import static utils.ImageUtils.getPictureFromClipboard;
 
 public class CreateNewPersonController {
+    public ContextMenu eventsSuggester;
     private KeepDataHelper dataHelper;
+    private List<String> allEvents;
 
     public ScrollPane scrollPane;
     public TextField name;
@@ -52,6 +63,14 @@ public class CreateNewPersonController {
     public Button cancel;
     public HBox hBox;
 
+    public void setDataHelper(KeepDataHelper dataHelper) {
+        this.dataHelper = dataHelper;
+    }
+
+    public void setEventsList(List<String> allEvents) {
+        this.allEvents = allEvents;
+    }
+
     /**
      * Закрывает окно
      */
@@ -59,6 +78,9 @@ public class CreateNewPersonController {
         getStage().close();
     }
 
+    /**
+     * При сохранении записывает в БД нового человека
+     */
     public void save() {
         List<String> imgPaths = saveImagesToComputer();
         Set<String> eventsSet = new HashSet<>(Arrays.asList((events.getText().trim().split(","))));
@@ -111,10 +133,6 @@ public class CreateNewPersonController {
         } catch (UnsupportedFlavorException | IOException e) {
             System.out.println("вы выбрали не картинку!");
         }
-    }
-
-    public void setDataHelper(KeepDataHelper dataHelper) {
-        this.dataHelper = dataHelper;
     }
 
     /**
@@ -196,5 +214,65 @@ public class CreateNewPersonController {
             }
         }
         return paths;
+    }
+
+    /**
+     * Добавляет автозаполнение к Мероприятиям
+     */
+    public void getSuggestions() {
+        eventsSuggester.hide();
+        eventsSuggester.getItems().clear();
+        String text = events.getText();
+        if (text == null || text.trim().isEmpty() || text.endsWith(",")) {
+            return;
+        }
+        List<String> existFields = new ArrayList<>();
+        String textToSearch;
+        // если елемент не единственный - взять последний
+        if (text.contains(",")) {
+            textToSearch = text.substring(text.lastIndexOf(",") + 1);
+            existFields.addAll(Arrays.asList(text.split(",")));
+            existFields.remove(textToSearch);
+        } else {
+            textToSearch = text;
+        }
+        List<String> possibleEvents = allEvents.stream()
+                .filter(event -> event.toUpperCase().contains(textToSearch.toUpperCase()))
+                .filter(event -> !existFields.contains(event))
+                .filter(event -> !event.equals(textToSearch))
+                .collect(Collectors.toList());
+        if (!possibleEvents.isEmpty()) {
+            for (String possibleEvent : possibleEvents) {
+                Label entryLabel = new Label();
+                entryLabel.setGraphic(buildTextFlow(possibleEvent, textToSearch));
+                entryLabel.setPrefHeight(10);  //don't sure why it's changed with "graphic"
+                CustomMenuItem item = new CustomMenuItem(entryLabel, true);
+                item.setOnAction(action -> {
+                    existFields.add(possibleEvent);
+                    events.setText(String.join(",", existFields));
+                    eventsSuggester.hide();
+                    events.positionCaret(events.getText().length());
+                });
+                eventsSuggester.getItems().add(item);
+                eventsSuggester.show(events, Side.BOTTOM, 0, 0);
+            }
+        }
+    }
+
+    /**
+     * Раскрашивает в тексте места, где text совпадает с filter
+     *
+     * @param text   текст, в котором надо раскрасить
+     * @param filter символны, которые надо раскрасить
+     * @return раскрашенный текст
+     */
+    private static TextFlow buildTextFlow(String text, String filter) {
+        int filterIndex = text.toLowerCase().indexOf(filter.toLowerCase());
+        Text textBefore = new Text(text.substring(0, filterIndex));
+        Text textAfter = new Text(text.substring(filterIndex + filter.length()));
+        Text textFilter = new Text(text.substring(filterIndex, filterIndex + filter.length())); //instead of "filter" to keep all "case sensitive"
+        textFilter.setFill(Color.ORANGE);
+        textFilter.setFont(Font.font("Helvetica", FontWeight.BOLD, 12));
+        return new TextFlow(textBefore, textFilter, textAfter);
     }
 }

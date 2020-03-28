@@ -18,16 +18,17 @@ import static utils.FileHelper.getTruePathURL;
 public class CreatePersonWindow {
 
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
-        try {
-            List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
-        } catch (SQLException e) {
-            System.out.println("Ошибка чтения списка мероприятий: " + e.getMessage());
-        }
-
         FXMLLoader loader = new FXMLLoader();
         Pane content = loader.load(requireNonNull(getTruePathURL("src/main/layouts/NewPerson.fxml")).openStream());
         CreateNewPersonController createNewPersonController = loader.getController();
         createNewPersonController.setDataHelper(dataHelper);
+        try {
+            List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
+            createNewPersonController.setEventsList(allEvents);
+        } catch (SQLException e) {
+            System.out.println("Ошибка чтения списка мероприятий: " + e.getMessage());
+        }
+
         BorderPane root = new BorderPane();
         root.setCenter(content);
         Stage stage = new Stage();
