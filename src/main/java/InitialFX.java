@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import layoutWindow.CreatePersonWindow;
+import layoutWindow.EditDataWindow;
 import utils.KeepDataHelper;
 
 import java.io.File;

@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!--suppress ALL -->
+
 <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
          prefWidth="751.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171"
          xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EditDataController">
@@ -22,14 +23,15 @@
                     <children>
                         <BorderPane prefHeight="27.0" prefWidth="751.0">
                             <left>
-                                <Label text="Фильтровать:" BorderPane.alignment="CENTER"/>
+                                <Label alignment="BOTTOM_LEFT" text="Фильтровать:" BorderPane.alignment="CENTER"/>
                             </left>
                             <padding>
                                 <Insets left="10.0" right="10.0" top="5.0"/>
                             </padding>
                             <right>
-                                <Button fx:id="addPersonButton" mnemonicParsing="false" onAction="#addNewPerson"
-                                        text="Добавить человека" BorderPane.alignment="CENTER"/>
+                                <Button fx:id="addPersonButton" contentDisplay="CENTER" mnemonicParsing="false"
+                                        onAction="#addNewPerson" text="Добавить человека"
+                                        BorderPane.alignment="CENTER"/>
                             </right>
                         </BorderPane>
                         <HBox>
