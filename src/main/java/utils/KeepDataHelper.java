@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static utils.FileHelper.getTruePath;
+
 @SuppressWarnings("JavaDoc")
 public class KeepDataHelper {
     private final Connection conn;
@@ -24,7 +26,7 @@ public class KeepDataHelper {
 
     public KeepDataHelper() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:src/main/java/resources/RememberMe.db");
+        conn = DriverManager.getConnection("jdbc:sqlite:" + getTruePath("src/main/java/resources/RememberMe.db"));
         peopleTable = new People(conn);
         picturesTable = new Pictures(conn, peopleTable);
         eventsTable = new Events(conn);

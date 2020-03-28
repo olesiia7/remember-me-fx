@@ -1,6 +1,5 @@
 import entities.Person;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
@@ -8,12 +7,15 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Initial extends Application {
+import static utils.FileHelper.getTruePath;
+
+public class InitialFX extends Application {
     public static final List<Person> savedPeople = new ArrayList<>();
     public static KeepDataHelper dataHelper;
 
@@ -26,13 +28,15 @@ public class Initial extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         VBox vBox = new VBox();
         Button button = new Button("Добавить человека");
-        button.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override
-            public void handle(javafx.event.ActionEvent actionEvent) {
-                System.out.println("Добавить человека");
+        button.setOnAction(actionEvent -> {
+            System.out.println("Добавить человека");
+            try {
+                new CreatePersonWindow(dataHelper, stage);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         vBox.getChildren().addAll(button);
@@ -51,7 +55,7 @@ public class Initial extends Application {
         savedPeople.stream()
                 .map(Person::getPictures)
                 .forEach(existPic::addAll);
-        File dir = new File("src/main/java/resources");
+        File dir = new File(getTruePath("src/main/java/resources"));
         File[] arrFiles = dir.listFiles();
         if (arrFiles != null) {
             List<String> redundantPic = Arrays.stream(arrFiles)
