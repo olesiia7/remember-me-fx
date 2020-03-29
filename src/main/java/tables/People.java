@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -72,11 +71,7 @@ public class People implements Table {
         try {
             Statement statement = conn.createStatement();
             ResultSet peopleResultSet = statement.executeQuery("Select * from " + getTableName() + ";");
-
-            while (peopleResultSet.next()) {
-                Person person = getPersonFromResultSet(peopleResultSet);
-                people.add(person);
-            }
+            people.addAll(getPeopleFromResultSet(peopleResultSet));
             statement.close();
             peopleResultSet.close();
         } catch (SQLException e) {
@@ -103,10 +98,7 @@ public class People implements Table {
                     statement.setInt(i++, id);
                 }
                 ResultSet peopleResultSet = statement.executeQuery();
-                while (peopleResultSet.next()) {
-                    Person person = getPersonFromResultSet(peopleResultSet);
-                    people.add(person);
-                }
+                people.addAll(getPeopleFromResultSet(peopleResultSet));
                 statement.close();
                 peopleResultSet.close();
             } catch (SQLException e) {
@@ -120,18 +112,23 @@ public class People implements Table {
      * Возвращает Person из ResultSet
      *
      * @param rs ResultSet, из которого надо вытянуть данные
-     * @return данные о человеке из таблицы
+     * @return данные о людях из таблицы
      * @throws SQLException
      */
     @NonNull
-    private Person getPersonFromResultSet(@NonNull ResultSet rs) throws SQLException {
-        int id = rs.getInt(People.id);
-        String name = rs.getString(People.name);
-        String company = rs.getString(People.company);
-        String role = rs.getString(People.role);
-        String description = rs.getString(People.description);
-        boolean remembered = rs.getBoolean(People.remembered);
-        return new Person(id, name, null, company, role, description, null, remembered);
+    public static List<Person> getPeopleFromResultSet(@NonNull ResultSet rs) throws SQLException {
+        List<Person> people = new ArrayList<>();
+        while (rs.next()) {
+            int id = rs.getInt(People.id);
+            String name = rs.getString(People.name);
+            String company = rs.getString(People.company);
+            String role = rs.getString(People.role);
+            String description = rs.getString(People.description);
+            boolean remembered = rs.getBoolean(People.remembered);
+            Person person = new Person(id, name, null, company, role, description, null, remembered);
+            people.add(person);
+        }
+        return people;
     }
 
     /**
@@ -192,35 +189,5 @@ public class People implements Table {
             e.printStackTrace();
         }
         return companies;
-    }
-
-    @NonNull
-    public Set<Integer> getPeopleIdByCompanies(@NonNull List<String> companies) {
-        Set<Integer> peopleId = new HashSet<>();
-        StringBuilder SQLBuilder = new StringBuilder("Select distinct " + id + " from " + getTableName());
-        if (!companies.isEmpty()) {
-            SQLBuilder.append(" where " + company + " in (");
-            for (int i = 0; i < companies.size(); i++) {
-                SQLBuilder.append("?,");
-            }
-            SQLBuilder.deleteCharAt(SQLBuilder.length() - 1).append(")");
-        }
-        String SQL = SQLBuilder.toString() + ";";
-
-        try {
-            PreparedStatement statement = conn.prepareStatement(SQL);
-            for (int i = 0; i < companies.size(); i++) {
-                statement.setString(i + 1, companies.get(i));
-            }
-            ResultSet peopleIdResultSet = statement.executeQuery();
-            while (peopleIdResultSet.next()) {
-                peopleId.add(peopleIdResultSet.getInt(id));
-            }
-            statement.close();
-            peopleIdResultSet.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return peopleId;
     }
 }

@@ -9,11 +9,14 @@ import tables.Pictures;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static tables.People.getPeopleFromResultSet;
 
 @SuppressWarnings("JavaDoc")
 public class KeepDataHelper {
@@ -87,15 +90,43 @@ public class KeepDataHelper {
      * @return список людей, кто имеет совпадения и по мероприятиям, и по компаниям
      */
     public List<Person> getPeopleByCriteria(@NonNull List<String> events, @NonNull List<String> companies) {
-        Set<Integer> peopleId = new HashSet<>(eventsAndPeopleTable.getPeopleByEvents(events));
-        Set<Integer> peopleByCompanies = peopleTable.getPeopleIdByCompanies(companies);
-        peopleId.retainAll(peopleByCompanies);
-        List<Person> selectedPeople = peopleTable.getPeopleById(peopleId);
-        for (Person person : selectedPeople) {
-            person.setPictures(picturesTable.getPersonPictures(person.getId()));
-            person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+        List<Person> people = new ArrayList<>();
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select * from ").append(peopleTable.getTableName());
+        boolean whereExist = false;
+        if (!events.isEmpty()) {
+            sqlBuilder.append(" where ").append(People.id).append(" in (");
+            eventsAndPeopleTable.getPeopleByEventsSQL(sqlBuilder, events);
+            sqlBuilder.append(")");
+            whereExist = true;
         }
-        return selectedPeople;
+        if (!companies.isEmpty()) {
+            if (whereExist) {
+                sqlBuilder.append(" and ");
+            } else {
+                sqlBuilder.append(" where ");
+            }
+            sqlBuilder.append(People.company).append(" in(");
+            for (String company : companies) {
+                sqlBuilder.append("'").append(company).append("'").append(",");
+            }
+            sqlBuilder.deleteCharAt(sqlBuilder.length() - 1).append(")");
+        }
+        sqlBuilder.append(";");
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlBuilder.toString());
+            people.addAll(getPeopleFromResultSet(resultSet));
+            for (Person person : people) {
+                person.setPictures(picturesTable.getPersonPictures(person.getId()));
+                person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+            }
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return people;
     }
 
     /**

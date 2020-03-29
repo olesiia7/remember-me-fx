@@ -1,5 +1,7 @@
 package tables;
 
+import lombok.NonNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,37 +88,22 @@ public class EventsAndPeople implements Table {
         return events;
     }
 
-
     /**
-     * @param events список мероприятий
-     * @return список id людей, у которых есть хоть одно мероприятия из events
+     * Добавляет в sqlBuilder запрос, возвращающий список id людей, у которых
+     * есть хоть одно мероприятие
+     *
+     * @param sqlBuilder sqlBuilder, в который дополнится запрос
+     * @param events     список мероприятий, в которых должен быть человек
      */
-    public Set<Integer> getPeopleByEvents(List<String> events) {
-        Set<Integer> peopleId = new HashSet<>();
-        StringBuilder SQLBuilder = new StringBuilder("select distinct " + getTableName() + "." + personIdField + " from " + eventsTable.getTableName()
-                + " INNER JOIN " + getTableName() + " ON "
-                + eventsTable.getTableName() + "." + Events.id + "=" + getTableName() + "." + eventIdField);
+    public void getPeopleByEventsSQL(StringBuilder sqlBuilder, @NonNull List<String> events) {
+        sqlBuilder.append("select distinct ").append(getTableName()).append(".").append(personIdField).append(" from ").append(eventsTable.getTableName()).append(" INNER JOIN ").append(getTableName()).append(" ON ").append(eventsTable.getTableName()).append(".").append(Events.id).append("=").append(getTableName()).append(".").append(eventIdField);
         if (!events.isEmpty()) {
-            SQLBuilder.append(" where " + Events.name + " in (");
-            for (int i = 0; i < events.size(); i++) {
-                SQLBuilder.append("?,");
+            sqlBuilder.append(" where " + Events.name + " in (");
+            for (String event : events) {
+                sqlBuilder.append("'").append(event).append("',");
             }
-            SQLBuilder.deleteCharAt(SQLBuilder.length() - 1).append(")");
+            sqlBuilder.deleteCharAt(sqlBuilder.length() - 1).append(")");
         }
-        String SQL = SQLBuilder.toString() + ";";
-        try {
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            for (int i = 0; i < events.size(); i++) {
-                ps.setString(i + 1, events.get(i));
-            }
-            ResultSet resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                peopleId.add(resultSet.getInt(personIdField));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return peopleId;
     }
 
     public static String getFieldNamesWithoutId() {
