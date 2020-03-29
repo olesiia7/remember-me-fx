@@ -23,6 +23,14 @@ public class Events implements Table {
         this.conn = conn;
     }
 
+    public String getId() {
+        return getTableName() + "." + id;
+    }
+
+    public String getName() {
+        return getTableName() + "." + name;
+    }
+
     @Override
     public String getTableName() {
         return "events";

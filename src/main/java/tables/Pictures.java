@@ -52,9 +52,13 @@ public class Pictures implements Table {
      */
     // ToDo: написать массовую вставку изображений
     public void setPersonPictures(Person person) throws SQLException {
+        List<String> pictures = person.getPictures();
+        if (pictures == null || pictures.isEmpty()) {
+            return;
+        }
         String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutId() + ") " +
                 "VALUES (?, ?);";
-        for (String picture : person.getPictures()) {
+        for (String picture : pictures) {
             PreparedStatement ps = conn.prepareStatement(SQL);
             ps.setString(1, picture);
             ps.setInt(2, person.getId());

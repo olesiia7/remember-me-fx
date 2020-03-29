@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static tables.Table.appendWithDelimiter;
@@ -86,14 +87,9 @@ public class People implements Table {
         if (!peopleId.isEmpty()) {
             StringBuilder SQLBuilder = new StringBuilder("select * from " + getTableName() +
                     " where " + id + " in (");
-            for (int i = 0; i < peopleId.size(); i++) {
-                SQLBuilder.append("?,");
-            }
-            SQLBuilder.deleteCharAt(SQLBuilder.length() - 1).append(")");
-            String SQL = SQLBuilder.toString() + ";";
-
+            SQLBuilder.append(peopleId.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
             try {
-                PreparedStatement statement = conn.prepareStatement(SQL);
+                PreparedStatement statement = conn.prepareStatement(SQLBuilder.toString());
                 int i = 1;
                 for (Integer id : peopleId) {
                     statement.setInt(i++, id);
@@ -192,16 +188,13 @@ public class People implements Table {
         return companies;
     }
 
-    public void deletePerson(@NonNull int... ids) {
-        if (ids.length == 0) {
+    public void deletePerson(@NonNull List<Integer> ids) {
+        if (ids.isEmpty()) {
             return;
         }
         StringBuilder sql = new StringBuilder();
         sql.append("delete from ").append(getTableName()).append(" where ").append(id).append(" in(");
-        for (int id : ids) {
-            sql.append(id).append(",");
-        }
-        sql.deleteCharAt(sql.length() - 1).append(");");
+        sql.append(ids.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
         try {
             Statement statement = conn.createStatement();
             statement.execute(sql.toString());

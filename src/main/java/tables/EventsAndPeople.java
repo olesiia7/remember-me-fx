@@ -7,9 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static tables.Table.appendWithDelimiter;
 
@@ -32,13 +34,21 @@ public class EventsAndPeople implements Table {
         return "events_and_people";
     }
 
+    public String getEventIdField() {
+        return getTableName() + "." + eventIdField;
+    }
+
+    public String getPersonIdField() {
+        return getTableName() + "." + eventIdField;
+    }
+
     @Override
     public void createTableIfNotExist() throws SQLException {
         Statement statement = conn.createStatement();
         statement.execute("create table if not exists " + getTableName() + " (" +
                 personIdField + " integer not null, " +
                 eventIdField + " integer not null, " +
-                "foreign key (" + personIdField + ") references " + peopleTable.getTableName() + "(" + People.id + ") " +
+                "foreign key (" + personIdField + ") references " + peopleTable.getTableName() + "(" + People.id + ") ON DELETE CASCADE " +
                 "foreign key (" + eventIdField + ") references " + eventsTable.getTableName() + "(" + Events.id + ") " +
                 "ON DELETE CASCADE);");
         statement.close();
@@ -68,15 +78,19 @@ public class EventsAndPeople implements Table {
      * @param personId id человека
      * @return список мероприятий человека
      */
-    public Set<String> getPersonEvents(int personId) {
+    public Set<String> getPeopleEvents(List<Integer> personId) {
         Set<String> events = new HashSet<>();
-        String SQL = "select " + eventsTable.getTableName() + "." + Events.name + " from " + getTableName()
-                + " INNER JOIN " + eventsTable.getTableName() + " ON "
-                + eventsTable.getTableName() + "." + Events.id + "=" + getTableName() + "." + eventIdField +
-                " where " + personIdField + "=?";
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("select distinct ").append(eventsTable.getName())
+                .append(" from ").append(getTableName())
+                .append(" INNER JOIN ").append(eventsTable.getTableName()).append(" ON ")
+                .append(eventsTable.getId())
+                .append("=").append(getEventIdField())
+                .append(" where ")
+                .append(personIdField).append(" in (");
         try {
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            ps.setInt(1, personId);
+            SQL.append(personId.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
+            PreparedStatement ps = conn.prepareStatement(SQL.toString());
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 events.add(resultSet.getString(Events.name));
@@ -84,8 +98,11 @@ public class EventsAndPeople implements Table {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return events;
+    }
+
+    public Set<String> getPeopleEvents(int personId) {
+        return getPeopleEvents(Collections.singletonList(personId));
     }
 
     /**
@@ -96,17 +113,29 @@ public class EventsAndPeople implements Table {
      * @param events     список мероприятий, в которых должен быть человек
      */
     public void getPeopleByEventsSQL(StringBuilder sqlBuilder, @NonNull List<String> events) {
-        sqlBuilder.append("select distinct ").append(getTableName()).append(".").append(personIdField).append(" from ").append(eventsTable.getTableName()).append(" INNER JOIN ").append(getTableName()).append(" ON ").append(eventsTable.getTableName()).append(".").append(Events.id).append("=").append(getTableName()).append(".").append(eventIdField);
+        sqlBuilder.append("select distinct ").append(getPersonIdField()).append(" from ").append(eventsTable.getTableName())
+                .append(" INNER JOIN ").append(getTableName()).append(" ON ")
+                .append(eventsTable.getId()).append("=").append(getEventIdField());
         if (!events.isEmpty()) {
             sqlBuilder.append(" where " + Events.name + " in (");
-            for (String event : events) {
-                sqlBuilder.append("'").append(event).append("',");
-            }
-            sqlBuilder.deleteCharAt(sqlBuilder.length() - 1).append(")");
+            sqlBuilder.append(events.stream().map(event -> "'" + event + "'").collect(Collectors.joining(","))).append(")");
         }
     }
 
     public static String getFieldNamesWithoutId() {
         return personIdField + appendWithDelimiter(eventIdField);
+    }
+
+    public void deleteUnusedEvents() {
+        String SQL = "delete from " + eventsTable.getTableName() + " where " + Events.id + " in (SELECT " + Events.id +
+                " FROM " + eventsTable.getTableName() + " LEFT JOIN " + getTableName() +
+                " ON " + eventsTable.getId() + "=" + getEventIdField() + " WHERE " + getEventIdField() + " is null);";
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

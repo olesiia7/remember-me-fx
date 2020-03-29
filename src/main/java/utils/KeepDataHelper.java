@@ -15,6 +15,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static tables.People.getPeopleFromResultSet;
 import static utils.FileUtils.deleteFiles;
@@ -56,7 +57,7 @@ public class KeepDataHelper {
         for (Person person : allPeople) {
             // получаем изображения по каждому человеку
             person.setPictures(picturesTable.getPersonPictures(person.getId()));
-            person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+            person.setEvents(eventsAndPeopleTable.getPeopleEvents(person.getId()));
         }
         return allPeople;
     }
@@ -81,6 +82,14 @@ public class KeepDataHelper {
      */
     public List<String> getAllEvents() {
         return eventsTable.getAllEvents();
+    }
+
+    /**
+     * @param id id чедлвека
+     * @return список мероприятий пользователя
+     */
+    public Set<String> getPersonEvents(int id) {
+        return eventsAndPeopleTable.getPeopleEvents(id);
     }
 
     /**
@@ -114,10 +123,7 @@ public class KeepDataHelper {
                 sqlBuilder.append(" where ");
             }
             sqlBuilder.append(People.company).append(" in(");
-            for (String company : companies) {
-                sqlBuilder.append("'").append(company).append("'").append(",");
-            }
-            sqlBuilder.deleteCharAt(sqlBuilder.length() - 1).append(")");
+            sqlBuilder.append(companies.stream().map(company -> "'" + company + "'").collect(Collectors.joining(","))).append(")");
         }
         sqlBuilder.append(";");
         try {
@@ -126,7 +132,7 @@ public class KeepDataHelper {
             people.addAll(getPeopleFromResultSet(resultSet));
             for (Person person : people) {
                 person.setPictures(picturesTable.getPersonPictures(person.getId()));
-                person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+                person.setEvents(eventsAndPeopleTable.getPeopleEvents(person.getId()));
             }
             resultSet.close();
             statement.close();
@@ -157,12 +163,10 @@ public class KeepDataHelper {
      */
     //ToDo: сделать массовую вставку (сейчас вставка по одному)
     @NonNull
-    private List<Integer> insertNewPerson(@NonNull List<Person> people) throws SQLException {
-        List<Integer> ids = new ArrayList<>();
+    public void savePeople(@NonNull Person... people) throws SQLException {
         for (Person person : people) {
             savePerson(person);
         }
-        return ids;
     }
 
     /**
@@ -189,13 +193,14 @@ public class KeepDataHelper {
      *
      * @return
      */
-    public void deletePeople(@NonNull int... ids) {
+    public void deletePeople(@NonNull List<Integer> ids) {
         List<String> uninstallImages = new ArrayList<>();
         for (int id : ids) {
             uninstallImages.addAll(picturesTable.getPersonPictures(id));
         }
         deleteFiles(uninstallImages);
         peopleTable.deletePerson(ids);
+        eventsAndPeopleTable.deleteUnusedEvents();
     }
 
     /**

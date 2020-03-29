@@ -10,8 +10,10 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +49,7 @@ public class DbTests {
             assertTrue(file.exists());
         }
 
-        dataHelper.deletePeople(savedPeople.get(0).getId());
+        dataHelper.deletePeople(singletonList(savedPeople.get(0).getId()));
         savedPeople = dataHelper.getSavedPeople();
         assertEquals(0, savedPeople.size());
         assertEquals(0, dataHelper.getAllPictures().size());
@@ -55,6 +57,42 @@ public class DbTests {
             File file = new File(path);
             assertFalse(file.exists());
         }
+    }
+
+    /**
+     * Проверяет, удаляются ли каскадно данные из мероприятий и таблицы people
+     */
+    @Test
+    public void eventsCascadeDeleteTest() throws SQLException {
+        Person deletedPerson = getPersonExample("test1");
+        deletedPerson.setEvents(new HashSet<>(Arrays.asList("Мероприятие1", "Мероприятие2")));
+        deletedPerson.setPictures(Arrays.asList("src/test/resources/testImage.png", "src/test/resources/testImage2.png"));
+        Person existPerson = getPersonExample("test2");
+        existPerson.setEvents(new HashSet<>(singletonList("Мероприятие2")));
+        existPerson.setPictures(Arrays.asList("src/test/resources/testImage.png", "src/test/resources/testImage2.png"));
+        dataHelper.savePeople(deletedPerson, existPerson);
+
+        // проверяем, что пользователи и мероприятия созданы
+        List<Person> savedPeople = dataHelper.getSavedPeople();
+        assertEquals(2, savedPeople.size());
+        List<String> events = dataHelper.getAllEvents();
+        assertEquals(2, events.size());
+
+        // проверяем, что остался только 1 пользователь
+        int deletedPersonId = deletedPerson.getId();
+        int existPersonId = existPerson.getId();
+        dataHelper.deletePeople(singletonList(deletedPersonId));
+        savedPeople = dataHelper.getSavedPeople();
+        assertEquals(1, savedPeople.size());
+        assertEquals(existPersonId, savedPeople.get(0).getId());
+
+        Set<String> deletedPersonEvents = dataHelper.getPersonEvents(deletedPersonId);
+        assertEquals(0, deletedPersonEvents.size());
+
+        Set<String> existPersonEvents = dataHelper.getPersonEvents(existPersonId);
+        assertEquals(1, existPersonEvents.size());
+        assertEquals(existPersonEvents, new HashSet<>(singletonList("Мероприятие2")));
+        assertEquals(1, dataHelper.getAllEvents().size());
     }
 
     /**

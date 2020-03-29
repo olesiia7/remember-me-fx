@@ -26,6 +26,7 @@ import utils.KeepDataHelper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class EditDataController {
@@ -128,7 +129,8 @@ public class EditDataController {
                         } else {
                             btn.setOnAction(event -> {
                                 Person person = getTableView().getItems().get(getIndex());
-                                System.out.println(person);
+                                dataHelper.deletePeople(Collections.singletonList(person.getId()));
+                                refreshFilters();
                             });
                             setGraphic(btn);
                         }
