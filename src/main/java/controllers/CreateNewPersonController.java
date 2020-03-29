@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
 import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
-import static utils.ImageUtils.getPictureFromClipboard;
+import static utils.FileUtils.getPictureFromClipboard;
 
 public class CreateNewPersonController {
     private KeepDataHelper dataHelper;
@@ -87,7 +87,7 @@ public class CreateNewPersonController {
         Person person = new Person(name.getText().trim(), eventsSet,
                 company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
         try {
-            dataHelper.savePersonAndGetId(person);
+            dataHelper.savePerson(person);
             // уведомить, что создан новый человек
             if (listener != null) {
                 listener.newUserHasBeenCreated();

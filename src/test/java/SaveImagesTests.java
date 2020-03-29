@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
-import static utils.ImageUtils.getPictureFromClipboard;
+import static utils.FileUtils.getPictureFromClipboard;
 
 public class SaveImagesTests {
 

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import static tables.People.getPeopleFromResultSet;
+import static utils.FileUtils.deleteFiles;
 
 @SuppressWarnings("JavaDoc")
 public class KeepDataHelper {
@@ -27,12 +28,20 @@ public class KeepDataHelper {
     private final EventsAndPeople eventsAndPeopleTable;
 
     public KeepDataHelper() throws ClassNotFoundException, SQLException {
+        this("src/main/java/resources/RememberMe.db");
+    }
+
+    public KeepDataHelper(String sqlPath) throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:src/main/java/resources/RememberMe.db");
+        conn = DriverManager.getConnection("jdbc:sqlite:" + sqlPath);
         peopleTable = new People(conn);
         picturesTable = new Pictures(conn, peopleTable);
         eventsTable = new Events(conn);
         eventsAndPeopleTable = new EventsAndPeople(conn, peopleTable, eventsTable);
+        // включаем поддержку сторонних ключей
+        Statement statement = conn.createStatement();
+        statement.execute("PRAGMA foreign_keys=ON");
+        statement.close();
     }
 
     /**
@@ -48,8 +57,6 @@ public class KeepDataHelper {
             // получаем изображения по каждому человеку
             person.setPictures(picturesTable.getPersonPictures(person.getId()));
             person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
-            System.out.println(person);
-            System.out.println(" ----- ");
         }
         return allPeople;
     }
@@ -135,10 +142,10 @@ public class KeepDataHelper {
      * @throws SQLException
      */
     private void dropAllTables() throws SQLException {
-        peopleTable.dropTable(conn);
-        picturesTable.dropTable(conn);
-        eventsTable.dropTable(conn);
         eventsAndPeopleTable.dropTable(conn);
+        eventsTable.dropTable(conn);
+        picturesTable.dropTable(conn);
+        peopleTable.dropTable(conn);
     }
 
     /**
@@ -153,7 +160,7 @@ public class KeepDataHelper {
     private List<Integer> insertNewPerson(@NonNull List<Person> people) throws SQLException {
         List<Integer> ids = new ArrayList<>();
         for (Person person : people) {
-            savePersonAndGetId(person);
+            savePerson(person);
         }
         return ids;
     }
@@ -164,13 +171,31 @@ public class KeepDataHelper {
      * @param person данные, которые необходимо сохранить
      * @throws SQLException
      */
-    public void savePersonAndGetId(@NonNull Person person) throws SQLException {
+    public void savePerson(@NonNull Person person) throws SQLException {
         // сохранение в таблицу человека
         peopleTable.savePersonAndGetId(person);
         // сохранение в таблицу картинок человека
         picturesTable.setPersonPictures(person);
         Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person);
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
+    }
+
+    public List<String> getAllPictures() {
+        return picturesTable.getAllPictures();
+    }
+
+    /**
+     * Удаляет человека из таблиц, удаляет изображения
+     *
+     * @return
+     */
+    public void deletePeople(@NonNull int... ids) {
+        List<String> uninstallImages = new ArrayList<>();
+        for (int id : ids) {
+            uninstallImages.addAll(picturesTable.getPersonPictures(id));
+        }
+        deleteFiles(uninstallImages);
+        peopleTable.deletePerson(ids);
     }
 
     /**

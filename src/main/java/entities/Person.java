@@ -1,5 +1,7 @@
 package entities;
 
+import lombok.NonNull;
+
 import java.util.List;
 import java.util.Set;
 
@@ -50,8 +52,8 @@ public class Person {
      * @param description описание
      * @param pictures    список путей к изображениям
      */
-    public Person(String name, Set<String> events, String company,
-                  String role, String description, List<String> pictures)
+    public Person(@NonNull String name, @NonNull Set<String> events, @NonNull String company,
+                  @NonNull String role, @NonNull String description, List<String> pictures)
     {
         this.name = name;
         this.events = events;

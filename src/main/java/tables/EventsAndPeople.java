@@ -40,7 +40,7 @@ public class EventsAndPeople implements Table {
                 eventIdField + " integer not null, " +
                 "foreign key (" + personIdField + ") references " + peopleTable.getTableName() + "(" + People.id + ") " +
                 "foreign key (" + eventIdField + ") references " + eventsTable.getTableName() + "(" + Events.id + ") " +
-                ");");
+                "ON DELETE CASCADE);");
         statement.close();
     }
 

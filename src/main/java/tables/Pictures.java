@@ -33,12 +33,14 @@ public class Pictures implements Table {
     @Override
     public void createTableIfNotExist() throws SQLException {
         Statement statement = conn.createStatement();
-        statement.execute("create table if not exists " + getTableName() + " (" +
+        String SQL = "create table if not exists " + getTableName() + " (" +
                 Pictures.id + " integer constraint picture_pk primary key autoincrement, " +
                 Pictures.path + " text not null, " +
                 Pictures.person_id + " integer not null, " +
-                "foreign key (" + Pictures.person_id + ") references " +
-                peopleTable.getTableName() + "(" + People.id + "));");
+                "foreign key (" + Pictures.person_id + ")" +
+                " references " + peopleTable.getTableName() + "(" + People.id + ")" +
+                " ON DELETE CASCADE ON UPDATE CASCADE);";
+        statement.execute(SQL);
         statement.close();
     }
 
@@ -74,7 +76,25 @@ public class Pictures implements Table {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return pictures;
+    }
 
+    /**
+     * @return список всех картинок пользователей
+     */
+    public List<String> getAllPictures() {
+        List<String> pictures = new ArrayList<>();
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from " + getTableName() + ";");
+            while (resultSet.next()) {
+                pictures.add(resultSet.getString(path));
+            }
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return pictures;
     }
 

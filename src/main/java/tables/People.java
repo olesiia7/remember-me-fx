@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static tables.Table.appendWithDelimiter;
 
 public class People implements Table {
@@ -140,7 +141,7 @@ public class People implements Table {
      */
     private static void setPersonInfo(@NonNull Person person, @NonNull PreparedStatement ps) throws SQLException {
         ps.setString(1, person.getName());
-        String events = String.join(",", person.getEvents());
+        String events = String.join(",", requireNonNull(person.getEvents(), "мероприятия не могут быть пустыми"));
         ps.setString(2, events);
         ps.setString(3, person.getCompany());
         ps.setString(4, person.getRole());
@@ -189,5 +190,24 @@ public class People implements Table {
             e.printStackTrace();
         }
         return companies;
+    }
+
+    public void deletePerson(@NonNull int... ids) {
+        if (ids.length == 0) {
+            return;
+        }
+        StringBuilder sql = new StringBuilder();
+        sql.append("delete from ").append(getTableName()).append(" where ").append(id).append(" in(");
+        for (int id : ids) {
+            sql.append(id).append(",");
+        }
+        sql.deleteCharAt(sql.length() - 1).append(");");
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(sql.toString());
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
