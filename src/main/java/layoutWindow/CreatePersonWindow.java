@@ -4,7 +4,6 @@ import controllers.CreateNewPersonController;
 import controllers.NewUserListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
@@ -23,22 +22,23 @@ public class CreatePersonWindow {
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/NewPerson.fxml").toURI().toURL()).openStream());
-        CreateNewPersonController createNewPersonController = loader.getController();
-        createNewPersonController.setDataHelper(dataHelper);
+        CreateNewPersonController controller = loader.getController();
+        controller.setDataHelper(dataHelper);
         // передаем событие - создан новый пользователь
-        createNewPersonController.addNewPersonListener(() -> {
+        controller.addNewPersonListener(() -> {
             if (listener != null) listener.newUserHasBeenCreated();
         });
         List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
-        createNewPersonController.setEventsList(allEvents);
+        controller.setEventsList(allEvents);
 
-        BorderPane root = new BorderPane();
-        root.setCenter(content);
         Stage stage = new Stage();
         stage.initOwner(ownerStage);
-        Scene scene = new Scene(root);
+
+        Scene scene = new Scene(content);
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.setMinWidth(content.getPrefWidth());
+        stage.setMinHeight(content.getPrefHeight());
         stage.setTitle("Добавление нового человека");
         stage.show();
     }

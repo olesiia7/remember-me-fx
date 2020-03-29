@@ -4,7 +4,6 @@ import controllers.EditDataController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
@@ -16,19 +15,18 @@ import static java.util.Objects.requireNonNull;
 
 public class EditDataWindow {
     public EditDataWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
+        Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader();
         TabPane content = loader.load(requireNonNull(new File("src/main/layouts/EditData.fxml").toURI().toURL().openStream()));
-        EditDataController editDataController = loader.getController();
-        editDataController.setDataHelper(dataHelper);
-        editDataController.setDataFirstTime();
+        EditDataController controller = loader.getController();
+        controller.setStage(stage);
+        controller.setDataHelper(dataHelper);
+        controller.setDataFirstTime();
 
-        BorderPane root = new BorderPane();
-        root.setCenter(content);
-        Stage stage = new Stage();
         stage.initOwner(ownerStage);
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(content);
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.setTitle("Редактирование записей");
         stage.show();
     }

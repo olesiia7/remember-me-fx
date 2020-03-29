@@ -2,6 +2,7 @@ package controllers;
 
 import entities.Person;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -26,6 +28,7 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +48,7 @@ import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 import static utils.FileUtils.getPictureFromClipboard;
 
 public class CreateNewPersonController {
+    public GridPane gridPane;
     private KeepDataHelper dataHelper;
     private List<String> allEvents;
 
@@ -63,6 +67,13 @@ public class CreateNewPersonController {
     public HBox hBox;
 
     private NewUserListener listener;
+
+    @FXML
+    private void initialize() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        gridPane.setMaxSize(screenSize.getWidth(), screenSize.getHeight());
+    }
+
     public void setDataHelper(KeepDataHelper dataHelper) {
         this.dataHelper = dataHelper;
     }

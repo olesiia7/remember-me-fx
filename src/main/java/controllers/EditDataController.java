@@ -10,12 +10,14 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -26,10 +28,14 @@ import utils.KeepDataHelper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class EditDataController {
+    public VBox peopleTabPane;
+    @FXML
+    public TabPane tabPanel;
     private KeepDataHelper dataHelper;
 
     private final ObservableList<Person> peopleData = FXCollections.observableArrayList();
@@ -59,6 +65,8 @@ public class EditDataController {
 
     private CheckComboBox<String> eventsFilter;
     private CheckComboBox<String> companiesFilter;
+
+    private Stage stage;
 
     // инициализируем форму данными
     @FXML
@@ -148,6 +156,10 @@ public class EditDataController {
         filterPanel.getChildren().addAll(eventsFilter, new Label("по работодателю:"), companiesFilter);
     }
 
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
     public void setDataHelper(KeepDataHelper dataHelper) {
         this.dataHelper = dataHelper;
     }
@@ -188,6 +200,7 @@ public class EditDataController {
      */
     private void setAutoResize() {
         tablePeople.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        List<Double> columnWidth = new ArrayList<>();
         tablePeople.getColumns().forEach((column) ->
         {
             //Minimal width = column header
@@ -222,7 +235,12 @@ public class EditDataController {
                 }
             }
             column.setPrefWidth(max + 10.0d);
+            columnWidth.add(max + 10.0d);
         });
+        tabPanel.setPrefSize(columnWidth.stream().mapToDouble(a -> a).sum() + 5, tabPanel.getPrefHeight());
+        tabPanel.requestLayout();
+        stage.setMinHeight(tabPanel.getPrefHeight() + 5);
+        stage.setMinWidth(tabPanel.getPrefWidth());
     }
 
     /**
@@ -231,7 +249,7 @@ public class EditDataController {
      */
     public void addNewPerson() {
         try {
-            CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, getStage());
+            CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, stage);
             // обновляем таблицу при новом пользователе
             createPersonWindow.addNewPersonListener(this::refreshFilters);
         } catch (IOException e) {
@@ -262,12 +280,5 @@ public class EditDataController {
 
         setDataToTable(dataHelper.getPeopleByCriteria(unmodifiedEventsList, unmodifiedCompaniesList));
         filterPanel.requestLayout();
-    }
-
-    /**
-     * @return сцену (окно)
-     */
-    private Stage getStage() {
-        return (Stage) addPersonButton.getScene().getWindow();
     }
 }
