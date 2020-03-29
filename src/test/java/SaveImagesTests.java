@@ -27,6 +27,7 @@ public class SaveImagesTests {
         File filePath = new File("src/test/resources");
         File file = new File(filePath + "/" + uuid + "_" + 1 + ".png");
         try {
+            //noinspection ResultOfMethodCallIgnored
             file.createNewFile();
             BufferedImage im = fromFXImage(image, null);
             ImageIO.write(im, "png", file);

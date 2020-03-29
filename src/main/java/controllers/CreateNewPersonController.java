@@ -198,6 +198,7 @@ public class CreateNewPersonController {
         List<String> paths = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
         File filePath = new File("src/main/java/resources");
+        //noinspection ResultOfMethodCallIgnored
         filePath.mkdir();
         int i = 0;
         List<Image> chosenImages = hBox.getChildren().stream()
@@ -210,6 +211,7 @@ public class CreateNewPersonController {
         for (Image image : chosenImages) {
             File file = new File(filePath + "/" + uuid + "_" + i++ + ".png");
             try {
+                //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
                 ImageIO.write(fromFXImage(image, null), "png", file);
                 paths.add(file.getPath());
