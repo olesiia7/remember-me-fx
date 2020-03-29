@@ -13,9 +13,7 @@
 
 <!--suppress ALL -->
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
-         prefWidth="751.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171"
-         xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EditDataController">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="751.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.EditDataController">
     <tabs>
         <Tab text="Люди">
             <content>
@@ -23,53 +21,51 @@
                     <children>
                         <BorderPane prefHeight="27.0" prefWidth="751.0">
                             <left>
-                                <Label alignment="BOTTOM_LEFT" text="Фильтровать:" BorderPane.alignment="CENTER"/>
+                                <Label alignment="BOTTOM_LEFT" text="Фильтровать:" BorderPane.alignment="CENTER" />
                             </left>
                             <padding>
-                                <Insets left="10.0" right="10.0" top="5.0"/>
+                                <Insets left="10.0" right="10.0" top="5.0" />
                             </padding>
                             <right>
-                                <Button fx:id="addPersonButton" contentDisplay="CENTER" mnemonicParsing="false"
-                                        onAction="#addNewPerson" text="Добавить человека"
-                                        BorderPane.alignment="CENTER"/>
+                                <Button fx:id="addPersonButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#addNewPerson" text="Добавить человека" BorderPane.alignment="CENTER" />
                             </right>
                         </BorderPane>
                         <HBox>
                             <opaqueInsets>
-                                <Insets/>
+                                <Insets />
                             </opaqueInsets>
                             <VBox.margin>
-                                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
+                                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                             </VBox.margin>
                         </HBox>
                         <HBox fx:id="filterPanel" alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" spacing="10.0">
                             <children>
                                 <Label alignment="CENTER_RIGHT" text="по мероприятиям">
                                     <HBox.margin>
-                                        <Insets/>
+                                        <Insets />
                                     </HBox.margin>
                                 </Label>
                             </children>
                             <VBox.margin>
-                                <Insets bottom="5.0" left="20.0" right="10.0"/>
+                                <Insets bottom="5.0" left="20.0" right="10.0" />
                             </VBox.margin>
                         </HBox>
                         <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0">
                             <columns>
-                                <TableColumn fx:id="picColumn" prefWidth="109.0" text="Изображение"/>
-                                <TableColumn fx:id="nameColumn" prefWidth="123.0" text="ФИО"/>
-                                <TableColumn fx:id="eventsColumn" minWidth="-1.0" prefWidth="100.0" text="Мероприятия"/>
-                                <TableColumn fx:id="companyColumn" prefWidth="118.0" text="Место работы"/>
-                                <TableColumn fx:id="roleColumn" prefWidth="93.0" text="Должность"/>
-                                <TableColumn fx:id="descriptionColumn" prefWidth="119.0" text="Описание"/>
-                                <TableColumn fx:id="editColumn" prefWidth="115.0" text="Редактировать"/>
-                                <TableColumn fx:id="deleteColumn" prefWidth="115.0" text="Удалить"/>
+                                <TableColumn fx:id="picColumn" prefWidth="109.0" style="-fx-alignment: CENTER;" text="Изображение" />
+                                <TableColumn fx:id="nameColumn" prefWidth="123.0" style="-fx-alignment: CENTER-LEFT;" text="ФИО" />
+                                <TableColumn fx:id="eventsColumn" minWidth="-1.0" prefWidth="100.0" style="-fx-alignment: CENTER-LEFT;" text="Мероприятия" />
+                                <TableColumn fx:id="companyColumn" prefWidth="118.0" style="-fx-alignment: CENTER-LEFT;" text="Место работы" />
+                                <TableColumn fx:id="roleColumn" prefWidth="93.0" style="-fx-alignment: CENTER-LEFT;" text="Должность" />
+                                <TableColumn fx:id="descriptionColumn" prefWidth="119.0" style="-fx-alignment: CENTER-LEFT;" text="Описание" />
+                                <TableColumn fx:id="editColumn" prefWidth="115.0" style="-fx-alignment: CENTER;" text="Редактировать" />
+                                <TableColumn fx:id="deleteColumn" prefWidth="115.0" style="-fx-alignment: CENTER;" text="Удалить" />
                             </columns>
                         </TableView>
                     </children>
                 </VBox>
             </content>
         </Tab>
-        <Tab text="Мероприятия"/>
+        <Tab text="Мероприятия" />
     </tabs>
 </TabPane>

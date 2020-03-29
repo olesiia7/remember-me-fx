@@ -20,7 +20,7 @@ public class EditDataWindow {
         TabPane content = loader.load(requireNonNull(new File("src/main/layouts/EditData.fxml").toURI().toURL().openStream()));
         EditDataController editDataController = loader.getController();
         editDataController.setDataHelper(dataHelper);
-        editDataController.setDataFirstTime(dataHelper.getSavedPeople());
+        editDataController.setDataFirstTime();
 
         BorderPane root = new BorderPane();
         root.setCenter(content);

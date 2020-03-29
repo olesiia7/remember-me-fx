@@ -208,10 +208,10 @@ public class CreateNewPersonController {
                 })
                 .collect(Collectors.toList());
         for (Image image : chosenImages) {
-            File file = new File(filePath + "/" + uuid + "_" + i++ + ".jpg");
+            File file = new File(filePath + "/" + uuid + "_" + i++ + ".png");
             try {
                 file.createNewFile();
-                ImageIO.write(fromFXImage(image, null), "jpg", file);
+                ImageIO.write(fromFXImage(image, null), "png", file);
                 paths.add(file.getPath());
             } catch (IOException e) {
                 e.printStackTrace();

@@ -1,5 +1,6 @@
 package controllers;
 
+import com.google.common.collect.ImmutableList;
 import entities.Person;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,6 +14,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -24,7 +26,6 @@ import utils.KeepDataHelper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class EditDataController {
@@ -39,7 +40,7 @@ public class EditDataController {
     @FXML
     private TableView<Person> tablePeople;
     @FXML
-    private TableColumn<Person, Image> picColumn;
+    private TableColumn<Person, ImageView> picColumn;
     @FXML
     private TableColumn<Person, String> nameColumn;
     @FXML
@@ -58,10 +59,6 @@ public class EditDataController {
     private CheckComboBox<String> eventsFilter;
     private CheckComboBox<String> companiesFilter;
 
-    private List<String> eventsFilterList = new ArrayList<>();
-    private List<String> companiesFilterList = new ArrayList<>();
-
-
     // инициализируем форму данными
     @FXML
     private void initialize() {
@@ -72,7 +69,12 @@ public class EditDataController {
                 String path = pictures.get(0);
                 try {
                     Image image = new Image(new FileInputStream(path));
-                    return new SimpleObjectProperty<>(image);
+                    ImageView imageView = new ImageView(image);
+                    imageView.setPickOnBounds(true);
+                    imageView.setPreserveRatio(true);
+                    imageView.setFitWidth(100);
+                    imageView.setFitHeight(100);
+                    return new SimpleObjectProperty<>(imageView);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -135,6 +137,13 @@ public class EditDataController {
             }
         };
         deleteColumn.setCellFactory(deleteCellFactory);
+
+        eventsFilter = new CheckComboBox<>();
+        eventsFilter.setPrefWidth(240);
+        companiesFilter = new CheckComboBox<>();
+        companiesFilter.setPrefWidth(240);
+        setCheckComboBoxListeners(eventsFilter, companiesFilter);
+        filterPanel.getChildren().addAll(eventsFilter, new Label("по работодателю:"), companiesFilter);
     }
 
     public void setDataHelper(KeepDataHelper dataHelper) {
@@ -143,36 +152,21 @@ public class EditDataController {
 
     /**
      * Заполняет таблицу и фильтрацию, инициализация фильтрации
-     *
-     * @param people список имеющихся людей
      */
-    public void setDataFirstTime(List<Person> people) {
-        setData(people);
-        filterPanel.getChildren().addAll(eventsFilter, new Label("по работодателю:"), companiesFilter);
+    public void setDataFirstTime() {
+        refreshFilters();
     }
 
-    private CheckComboBox<String> getEventsFilter() {
-        final ObservableList<String> allEvents = FXCollections.observableArrayList();
-        allEvents.addAll(dataHelper.getAllEvents());
-        return getCheckComboBox(allEvents, eventsFilterList);
-    }
-
-    private CheckComboBox<String> getCompaniesFilter() {
-        final ObservableList<String> allCompanies = FXCollections.observableArrayList();
-        allCompanies.addAll(dataHelper.getAllCompanies());
-        return getCheckComboBox(allCompanies, companiesFilterList);
-    }
-
-    private CheckComboBox<String> getCheckComboBox(ObservableList<String> allCompanies, List<String> filterList) {
-        final CheckComboBox<String> checkComboBox = new CheckComboBox<>(allCompanies);
-        final ObservableList<String> chosenCompanies = checkComboBox.getCheckModel().getCheckedItems();
-        chosenCompanies.addListener((ListChangeListener<String>) c -> {
-            filterList.clear();
-            filterList.addAll(chosenCompanies);
-            setData(dataHelper.getPeopleByCriteria(eventsFilterList, companiesFilterList));
-        });
-        checkComboBox.setPrefWidth(240);
-        return checkComboBox;
+    @SafeVarargs
+    private final void setCheckComboBoxListeners(CheckComboBox<String>... checkComboBoxes) {
+        for (CheckComboBox<String> checkComboBox : checkComboBoxes) {
+            final ObservableList<String> chosenItems = checkComboBox.getCheckModel().getCheckedItems();
+            chosenItems.addListener((ListChangeListener<String>) c -> {
+                ObservableList<String> eventsItems = eventsFilter.getCheckModel().getCheckedItems();
+                ObservableList<String> companiesItems = companiesFilter.getCheckModel().getCheckedItems();
+                setDataToTable(dataHelper.getPeopleByCriteria(eventsItems, companiesItems));
+            });
+        }
     }
 
     /**
@@ -180,14 +174,11 @@ public class EditDataController {
      *
      * @param people список людей
      */
-    public void setData(List<Person> people) {
+    public void setDataToTable(List<Person> people) {
         peopleData.clear();
         peopleData.addAll(people);
         tablePeople.setItems(peopleData);
         setAutoResize();
-
-        eventsFilter = getEventsFilter();
-        companiesFilter = getCompaniesFilter();
     }
 
     /**
@@ -200,27 +191,31 @@ public class EditDataController {
             //Minimal width = column header
             Text t = new Text(column.getText());
             double max;
-            if (column.getText().equals("Редактировать")) {
-                max = "Редактировать".length() * 7;
-            } else if (column.getText().equals("Удалить")) {
-                max = "Удалить".length() * 8;
-            } else {
-                max = t.getLayoutBounds().getWidth();
-                for (int i = 0; i < tablePeople.getItems().size(); i++) {
-                    //cell must not be empty
-                    Object cellData = column.getCellData(i);
-                    if (cellData != null) {
-                        double calcWidth;
-                        if (cellData instanceof Button) {
-                            Button button = (Button) cellData;
-                            calcWidth = button.getWidth();
-                        } else {
-                            t = new Text(cellData.toString());
-                            calcWidth = t.getLayoutBounds().getWidth();
-                        }
-                        if (calcWidth > max) {
-                            max = calcWidth;
-                        }
+            switch (column.getText()) {
+                case "Редактировать":
+                    max = "Редактировать".length() * 8;
+                    break;
+                case "Удалить":
+                    max = "Удалить".length() * 8;
+                    break;
+                default:
+                    max = t.getLayoutBounds().getWidth();
+                    break;
+            }
+            for (int i = 0; i < tablePeople.getItems().size(); i++) {
+                //cell must not be empty
+                Object cellData = column.getCellData(i);
+                if (cellData != null) {
+                    double calcWidth;
+                    if (cellData instanceof ImageView) {
+                        ImageView imageView = (ImageView) cellData;
+                        calcWidth = imageView.boundsInLocalProperty().getValue().getWidth();
+                    } else {
+                        t = new Text(cellData.toString());
+                        calcWidth = t.getLayoutBounds().getWidth();
+                    }
+                    if (calcWidth > max) {
+                        max = calcWidth;
                     }
                 }
             }
@@ -236,14 +231,35 @@ public class EditDataController {
         try {
             CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, getStage());
             // обновляем таблицу при новом пользователе
-            createPersonWindow.addNewPersonListener(() -> {
-                        setData(dataHelper.getSavedPeople());
-                        filterPanel.requestLayout();
-                    }
-            );
+            createPersonWindow.addNewPersonListener(this::refreshFilters);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void refreshFilters() {
+        final ObservableList<String> allEvents = FXCollections.observableArrayList();
+        allEvents.addAll(dataHelper.getAllEvents());
+
+        final ObservableList<String> allCompanies = FXCollections.observableArrayList();
+        allCompanies.addAll(dataHelper.getAllCompanies());
+
+        List<String> unmodifiedEventsList = ImmutableList.copyOf(eventsFilter.getCheckModel().getCheckedItems());
+        eventsFilter.getItems().clear();
+        eventsFilter.getItems().addAll(allEvents);
+        for (String selectedItem : unmodifiedEventsList) {
+            eventsFilter.getCheckModel().check(selectedItem);
+        }
+
+        List<String> unmodifiedCompaniesList = ImmutableList.copyOf(companiesFilter.getCheckModel().getCheckedItems());
+        companiesFilter.getItems().clear();
+        companiesFilter.getItems().addAll(allCompanies);
+        for (String selectedItem : unmodifiedCompaniesList) {
+            companiesFilter.getCheckModel().check(selectedItem);
+        }
+
+        setDataToTable(dataHelper.getPeopleByCriteria(unmodifiedEventsList, unmodifiedCompaniesList));
+        filterPanel.requestLayout();
     }
 
     /**
