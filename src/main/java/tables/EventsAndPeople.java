@@ -39,7 +39,7 @@ public class EventsAndPeople implements Table {
     }
 
     public String getPersonIdField() {
-        return getTableName() + "." + eventIdField;
+        return getTableName() + "." + personIdField;
     }
 
     @Override
