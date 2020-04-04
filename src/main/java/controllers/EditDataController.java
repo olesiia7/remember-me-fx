@@ -22,6 +22,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import layoutWindow.CreatePersonWindow;
+import layoutWindow.EditPersonWindow;
 import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
@@ -113,6 +114,11 @@ public class EditDataController {
                             btn.setOnAction(event -> {
                                 Person person = getTableView().getItems().get(getIndex());
                                 System.out.println(person);
+                                try {
+                                    new EditPersonWindow(dataHelper, stage, person);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             });
                             setGraphic(btn);
                         }
@@ -237,7 +243,7 @@ public class EditDataController {
             column.setPrefWidth(max + 10.0d);
             columnWidth.add(max + 10.0d);
         });
-        tabPanel.setPrefSize(columnWidth.stream().mapToDouble(a -> a).sum() + 5, tabPanel.getPrefHeight());
+        tabPanel.setPrefSize(columnWidth.stream().mapToDouble(a -> a).sum() + 16, tabPanel.getPrefHeight());
         tabPanel.requestLayout();
         stage.setMinHeight(tabPanel.getPrefHeight() + 5);
         stage.setMinWidth(tabPanel.getPrefWidth());

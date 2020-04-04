@@ -1,7 +1,7 @@
 package layoutWindow;
 
 import controllers.CreateNewPersonController;
-import controllers.NewUserListener;
+import listeners.NewPersonListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -17,7 +17,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 public class CreatePersonWindow {
-    private NewUserListener listener;
+    private NewPersonListener listener;
 
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
@@ -26,7 +26,7 @@ public class CreatePersonWindow {
         controller.setDataHelper(dataHelper);
         // передаем событие - создан новый пользователь
         controller.addNewPersonListener(() -> {
-            if (listener != null) listener.newUserHasBeenCreated();
+            if (listener != null) listener.newPersonCreated();
         });
         List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
         controller.setEventsList(allEvents);
@@ -43,7 +43,7 @@ public class CreatePersonWindow {
         stage.show();
     }
 
-    public void addNewPersonListener(NewUserListener evtListener) {
+    public void addNewPersonListener(NewPersonListener evtListener) {
         this.listener = evtListener;
     }
 }
