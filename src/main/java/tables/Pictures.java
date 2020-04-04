@@ -67,6 +67,35 @@ public class Pictures implements Table {
         }
     }
 
+    /**
+     * Удаляет старые и добавляет новые записи о изображениях пользователя
+     *
+     * @param person человек с выставленным id
+     * @throws SQLException
+     */
+    public void updatePersonPictures(Person person) throws SQLException {
+        deletePersonPictures(person.getId());
+        setPersonPictures(person);
+    }
+
+    /**
+     * Удаляет картики пользователя (действует каскадное удаление при удалении пользователя,
+     * эта функция только для update людей)
+     */
+    private void deletePersonPictures(int personId) {
+        String SQL = "delete from " + getTableName() + " where " + person_id + " = " + personId + ";";
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+
+    }
+
     public List<String> getPersonPictures(int personId) {
         List<String> pictures = new ArrayList<>();
         String SQL = "select " + path + " from " + getTableName() + " where " + person_id + "=?";

@@ -11,10 +11,6 @@ import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class CreateNewPersonController extends DefaultNewOrEditPersonController {
     public NewPersonListener listener;
@@ -32,10 +28,7 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
      */
     @Override
     public void save() {
-        List<String> imgPaths = saveImagesToComputer();
-        Set<String> eventsSet = new HashSet<>(Arrays.asList((events.getText().trim().split(","))));
-        Person person = new Person(name.getText().trim(), eventsSet,
-                company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
+        Person person = createPersonFromFields();
         try {
             dataHelper.savePerson(person);
             // уведомить, что создан новый человек
@@ -76,7 +69,7 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
         }
     }
 
-    public void addNewPersonListener(NewPersonListener evtListener) {
+    public void addListener(NewPersonListener evtListener) {
         this.listener = evtListener;
     }
 }

@@ -45,7 +45,7 @@ public class EditPersonWindow {
         stage.show();
     }
 
-    public void addNewPersonListener(PersonUpdatedListener listener) {
+    public void addListener(PersonUpdatedListener listener) {
         this.listener = listener;
     }
 }

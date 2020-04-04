@@ -63,6 +63,9 @@ public class EventsAndPeople implements Table {
      */
     // ToDo: написать массовую вставку мероприятий
     public void addPersonEvents(int personId, Set<Integer> eventIds) throws SQLException {
+        if (eventIds.isEmpty()) {
+            return;
+        }
         String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutId() + ") " +
                 "VALUES (?, ?);";
         for (int eventId : eventIds) {
@@ -101,7 +104,7 @@ public class EventsAndPeople implements Table {
         return events;
     }
 
-    public Set<String> getPeopleEvents(int personId) {
+    public Set<String> getPersonEvents(int personId) {
         return getPeopleEvents(Collections.singletonList(personId));
     }
 
@@ -126,6 +129,9 @@ public class EventsAndPeople implements Table {
         return personIdField + appendWithDelimiter(eventIdField);
     }
 
+    /**
+     * Удаляет мероприятия, которых нет в таблице EventsAndPeople
+     */
     public void deleteUnusedEvents() {
         String SQL = "delete from " + eventsTable.getTableName() + " where " + Events.id + " in (SELECT " + Events.id +
                 " FROM " + eventsTable.getTableName() + " LEFT JOIN " + getTableName() +
@@ -135,7 +141,34 @@ public class EventsAndPeople implements Table {
             statement.execute(SQL);
             statement.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @param eventsToDelete мероприятия, которые надо удалить из данного пользователя
+     */
+    public void deletePersonEvents(@NonNull Set<String> eventsToDelete, int personId) {
+        if (eventsToDelete.isEmpty()) {
+            return;
+        }
+        String SQL = "delete from " + getTableName() +
+                " where " + eventIdField +
+                " in (SELECT " + eventsTable.getId() + " FROM " + eventsTable.getTableName() +
+                " WHERE " + Events.name +
+                " in('" + String.join("','", eventsToDelete) + "')) " +
+                "AND " + personIdField + "=" + personId + ";";
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+        deleteUnusedEvents();
     }
 }

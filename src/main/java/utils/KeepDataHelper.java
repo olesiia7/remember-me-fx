@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static tables.People.getPeopleFromResultSet;
 import static utils.FileUtils.deleteFiles;
 
@@ -57,7 +58,7 @@ public class KeepDataHelper {
         for (Person person : allPeople) {
             // получаем изображения по каждому человеку
             person.setPictures(picturesTable.getPersonPictures(person.getId()));
-            person.setEvents(eventsAndPeopleTable.getPeopleEvents(person.getId()));
+            person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
         }
         return allPeople;
     }
@@ -89,7 +90,7 @@ public class KeepDataHelper {
      * @return список мероприятий пользователя
      */
     public Set<String> getPersonEvents(int id) {
-        return eventsAndPeopleTable.getPeopleEvents(id);
+        return eventsAndPeopleTable.getPersonEvents(id);
     }
 
     /**
@@ -132,7 +133,7 @@ public class KeepDataHelper {
             people.addAll(getPeopleFromResultSet(resultSet));
             for (Person person : people) {
                 person.setPictures(picturesTable.getPersonPictures(person.getId()));
-                person.setEvents(eventsAndPeopleTable.getPeopleEvents(person.getId()));
+                person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
             }
             resultSet.close();
             statement.close();
@@ -180,8 +181,37 @@ public class KeepDataHelper {
         peopleTable.savePersonAndGetId(person);
         // сохранение в таблицу картинок человека
         picturesTable.setPersonPictures(person);
-        Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person);
+        Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person.getEvents());
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
+    }
+
+    /**
+     * Перезаписывает данные пользователя
+     *
+     * @param person данные, которые необходимо сохранить
+     * @throws SQLException
+     */
+    public void updatePerson(@NonNull Person person) throws SQLException {
+        // обновление данных человека
+        peopleTable.updatePerson(person);
+        // обновление картинок
+        int personId = person.getId();
+        deletePeoplePictures(singletonList(personId));
+        picturesTable.updatePersonPictures(person);
+        // обновление мероприятий
+        Set<String> existPersonEvents = eventsAndPeopleTable.getPersonEvents(personId);
+        Set<String> actualEvents = person.getEvents();
+        // удаление ненужных мероприятий
+        Set<String> redundantEvents = existPersonEvents.stream()
+                .filter(event -> !actualEvents.contains(event))
+                .collect(Collectors.toSet());
+        eventsAndPeopleTable.deletePersonEvents(redundantEvents, personId);
+        // добавление новых мероприятий
+        Set<String> newEvents = actualEvents.stream()
+                .filter(event -> !existPersonEvents.contains(event))
+                .collect(Collectors.toSet());
+        Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(newEvents);
+        eventsAndPeopleTable.addPersonEvents(personId, eventIds);
     }
 
     public List<String> getAllPictures() {
@@ -194,13 +224,20 @@ public class KeepDataHelper {
      * @return
      */
     public void deletePeople(@NonNull List<Integer> ids) {
+        deletePeoplePictures(ids);
+        peopleTable.deletePerson(ids);
+        eventsAndPeopleTable.deleteUnusedEvents();
+    }
+
+    /**
+     * @param ids id людей, картинки которых надо удалить с компьютера
+     */
+    private void deletePeoplePictures(@NonNull List<Integer> ids) {
         List<String> uninstallImages = new ArrayList<>();
         for (int id : ids) {
             uninstallImages.addAll(picturesTable.getPersonPictures(id));
         }
         deleteFiles(uninstallImages);
-        peopleTable.deletePerson(ids);
-        eventsAndPeopleTable.deleteUnusedEvents();
     }
 
     /**

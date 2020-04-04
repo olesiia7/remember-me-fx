@@ -1,6 +1,5 @@
 package tables;
 
-import entities.Person;
 import lombok.NonNull;
 
 import java.sql.Connection;
@@ -48,15 +47,15 @@ public class Events implements Table {
     /**
      * Добавляет в таблицу мероприятия человека
      *
-     * @param person человек с выставленным id
-     * @throws SQLException
+     *
+     * @param newEvents@throws SQLException
      */
     // ToDo: написать массовую вставку мероприятий
-    public Set<Integer> addPersonEventsAndGetIds(Person person) throws SQLException {
+    public Set<Integer> addPersonEventsAndGetIds(Set<String> newEvents) throws SQLException {
         String SQL = "INSERT INTO " + getTableName() + " (" + name + ") " +
                 "VALUES (?);";
         Set<Integer> eventsIds = new HashSet<>();
-        for (String event : person.getEvents()) {
+        for (String event : newEvents) {
             // проверка, есть ли уже существующий event с таким именем
             Integer eventId = checkEventExistAndGetId(event);
             if (eventId != null) {

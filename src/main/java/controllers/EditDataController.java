@@ -115,7 +115,8 @@ public class EditDataController {
                                 Person person = getTableView().getItems().get(getIndex());
                                 System.out.println(person);
                                 try {
-                                    new EditPersonWindow(dataHelper, stage, person);
+                                    EditPersonWindow editPersonWindow = new EditPersonWindow(dataHelper, stage, person);
+                                    editPersonWindow.addListener(EditDataController.this::refreshFilters);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -257,7 +258,7 @@ public class EditDataController {
         try {
             CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, stage);
             // обновляем таблицу при новом пользователе
-            createPersonWindow.addNewPersonListener(this::refreshFilters);
+            createPersonWindow.addListener(this::refreshFilters);
         } catch (IOException e) {
             e.printStackTrace();
         }

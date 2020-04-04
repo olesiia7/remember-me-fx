@@ -25,7 +25,7 @@ public class CreatePersonWindow {
         CreateNewPersonController controller = loader.getController();
         controller.setDataHelper(dataHelper);
         // передаем событие - создан новый пользователь
-        controller.addNewPersonListener(() -> {
+        controller.addListener(() -> {
             if (listener != null) listener.newPersonCreated();
         });
         List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
@@ -43,7 +43,7 @@ public class CreatePersonWindow {
         stage.show();
     }
 
-    public void addNewPersonListener(NewPersonListener evtListener) {
+    public void addListener(NewPersonListener evtListener) {
         this.listener = evtListener;
     }
 }

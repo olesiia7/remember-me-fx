@@ -1,5 +1,6 @@
 package controllers;
 
+import entities.Person;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
@@ -28,7 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -68,6 +71,18 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
         GridPane.setMargin(hBox, new Insets(10));
         hBox.getChildren().addAll(saveButton, cancelButton);
         gridPane.add(hBox, 1, 4);
+    }
+
+    /**
+     * Собирает информацию из полей
+     *
+     * @return {@link Person}, в котором собрана информация из формы
+     */
+    Person createPersonFromFields() {
+        List<String> imgPaths = saveImagesToComputer();
+        Set<String> eventsSet = new HashSet<>(Arrays.asList((events.getText().trim().split(","))));
+        return new Person(name.getText().trim(), eventsSet,
+                company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
     }
 
     public void setEventsList(List<String> allEvents) {

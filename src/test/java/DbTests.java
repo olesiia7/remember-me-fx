@@ -96,10 +96,43 @@ public class DbTests {
     }
 
     /**
+     * Проверяет, удаляются ли каскадно данные из изображений (и сами файлы изображения) и таблицы people
+     */
+    @Test
+    public void updatePersonTest() throws SQLException {
+        Person person = getPersonExample("test1");
+        Person person2 = getPersonExample("test2");
+        person.setPictures(Arrays.asList("src/test/resources/testImage.png", "src/test/resources/testImage2.png"));
+        person.setEvents(new HashSet<>(Arrays.asList("Мероприятие1", "Мероприятие2")));
+        person2.setEvents(new HashSet<>(singletonList("Мероприятие1")));
+        dataHelper.savePerson(person);
+        dataHelper.savePerson(person2);
+        List<Person> savedPeople = dataHelper.getSavedPeople();
+        assertEquals(2, savedPeople.size());
+        person = savedPeople.get(0);
+        assertEquals(person.getName(), "test1");
+
+        Person expectedUpdatedPerson = person;
+        expectedUpdatedPerson.setName("test3");
+        person.setEvents(new HashSet<>(Arrays.asList("Мероприятие2", "Мероприятие3")));
+        person.setPictures(Arrays.asList("src/test/resources/testImage3.png", "src/test/resources/testImage4.png"));
+        dataHelper.updatePerson(expectedUpdatedPerson);
+
+        savedPeople = dataHelper.getSavedPeople();
+        assertEquals(2, savedPeople.size());
+        Person updatedPerson = savedPeople.get(0);
+        assertEquals(expectedUpdatedPerson.getName(), updatedPerson.getName());
+        assertEquals(expectedUpdatedPerson.getPictures(), updatedPerson.getPictures());
+        assertEquals(expectedUpdatedPerson.getEvents(), updatedPerson.getEvents());
+        List<String> allEvents = dataHelper.getAllEvents();
+        assertEquals(3, allEvents.size());
+    }
+
+    /**
      * @param name имя человека
      * @return {@link Person}, в котором нет id, events, pictures, isRemembered
      */
     private Person getPersonExample(@NonNull String name) {
-        return new Person(name, new HashSet<>(), "Company", "Role", "description", null);
+        return new Person(name, new HashSet<>(), "Company", "Role", "description\"sdf", null);
     }
 }

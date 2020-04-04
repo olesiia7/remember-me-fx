@@ -13,14 +13,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
 import static tables.Table.appendWithDelimiter;
 
 public class People implements Table {
     private final Connection conn;
     public static final String id = "id";
     public static final String name = "name";
-    public static final String events = "events";
     public static final String company = "company";
     public static final String role = "role";
     public static final String description = "description";
@@ -41,7 +39,6 @@ public class People implements Table {
         statement.execute("create table if not exists " + getTableName() + "(" +
                 People.id + " integer constraint people_pk primary key autoincrement, " +
                 People.name + " text, " +
-                People.events + " text, " +
                 People.company + " text, " +
                 People.role + " text, " +
                 People.description + " text, " +
@@ -50,19 +47,48 @@ public class People implements Table {
     }
 
     /**
-     * Сохраняет человека в таблицу и возвращает его id
+     * Сохраняет человека в таблицу
      *
      * @param person человек, которого нужно сохранить
      * @throws SQLException
      */
     public void savePersonAndGetId(Person person) throws SQLException {
         String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutIdAndRemembered() + ") " +
-                "VALUES (?, ?, ?, ?, ?);";
+                "VALUES (?, ?, ?, ?);";
         PreparedStatement ps = conn.prepareStatement(SQL);
         setPersonInfo(person, ps);
         ps.execute();
         ps.close();
         setPersonId(person);
+    }
+
+    /**
+     * Перезаписывает данные пользователя
+     *
+     * @param person человек, которого нужно сохранить
+     * @throws SQLException
+     */
+    // ToDo: сделать перезапись только измененных данных
+    public void updatePerson(Person person) {
+        String SQL = "UPDATE " + getTableName() + " SET " +
+                name + " = " + getFieldWithQuote(person.getName()) + ", " +
+                company + " = " + getFieldWithQuote(person.getCompany()) + ", " +
+                role + " = " + getFieldWithQuote(person.getRole()) + ", " +
+                description + " = " + getFieldWithQuote(person.getDescription()) +
+                " WHERE " + id + " = " + person.getId();
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+    }
+
+    private String getFieldWithQuote(String s) {
+        return "'" + s + "'";
     }
 
     /**
@@ -137,11 +163,9 @@ public class People implements Table {
      */
     private static void setPersonInfo(@NonNull Person person, @NonNull PreparedStatement ps) throws SQLException {
         ps.setString(1, person.getName());
-        String events = String.join(",", requireNonNull(person.getEvents(), "мероприятия не могут быть пустыми"));
-        ps.setString(2, events);
-        ps.setString(3, person.getCompany());
-        ps.setString(4, person.getRole());
-        ps.setString(5, person.getDescription());
+        ps.setString(2, person.getCompany());
+        ps.setString(3, person.getRole());
+        ps.setString(4, person.getDescription());
     }
 
     /**
@@ -152,7 +176,7 @@ public class People implements Table {
      */
     private void setPersonId(@NonNull Person person) throws SQLException {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
-                " WHERE " + name + "=? AND " + events + "=? AND " + company + "=? " +
+                " WHERE " + name + "=? AND " + company + "=? " +
                 "AND " + role + "=? AND " + description + "=?;";
         PreparedStatement ps = conn.prepareStatement(SQL);
         setPersonInfo(person, ps);
@@ -165,7 +189,6 @@ public class People implements Table {
 
     public String getFieldNamesWithoutIdAndRemembered() {
         return name +
-                appendWithDelimiter(events) +
                 appendWithDelimiter(company) +
                 appendWithDelimiter(role) +
                 appendWithDelimiter(description);

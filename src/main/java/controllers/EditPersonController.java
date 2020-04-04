@@ -4,6 +4,8 @@ import entities.Person;
 import javafx.scene.control.ContextMenu;
 import listeners.PersonUpdatedListener;
 
+import java.sql.SQLException;
+
 public class EditPersonController extends DefaultNewOrEditPersonController {
     private Person person;
     public ContextMenu eventsSuggester;
@@ -25,20 +27,18 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
      */
     @Override
     public void save() {
-//        List<String> imgPaths = saveImagesToComputer();
-//        Set<String> eventsSet = new HashSet<>(Arrays.asList((events.getText().trim().split(","))));
-//        Person person = new Person(name.getText().trim(), eventsSet,
-//                company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
-//        try {
-//            dataHelper.savePerson(person);
-//            // уведомить, что данные пользователя обновились
-//            if (listener != null) {
-//                listener.personUpdated();
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Ошибки при записи в файл");
-//            e.printStackTrace();
-//        }
+        Person updatedPerson = createPersonFromFields();
+        updatedPerson.setId(person.getId());
+        try {
+            dataHelper.updatePerson(updatedPerson);
+            // уведомить, что данные пользователя обновились
+            if (listener != null) {
+                listener.personUpdated();
+            }
+        } catch (SQLException e) {
+            System.out.println("Ошибки при записи в файл");
+            e.printStackTrace();
+        }
         getStage().close();
     }
 
