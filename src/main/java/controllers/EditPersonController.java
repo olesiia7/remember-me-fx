@@ -2,8 +2,12 @@ package controllers;
 
 import entities.Person;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.image.Image;
+import javafx.scene.layout.VBox;
 import listeners.PersonUpdatedListener;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
 public class EditPersonController extends DefaultNewOrEditPersonController {
@@ -20,6 +24,15 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
         role.setText(person.getRole());
         description.setText(person.getDescription());
         gridPane.setPrefHeight(gridPane.getPrefHeight() + 50);
+        for (String picture : person.getPictures()) {
+            try {
+                Image image = new Image(new FileInputStream(picture));
+                VBox imageLayout = getImageLayout(image);
+                imageHBox.getChildren().addAll(imageLayout);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
