@@ -125,7 +125,7 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     public List<String> saveImagesToComputer() {
         List<String> paths = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
-        File filePath = new File("src/main/java/resources");
+        File filePath = new File(dataHelper.getDataPath());
         //noinspection ResultOfMethodCallIgnored
         filePath.mkdir();
         int i = 0;

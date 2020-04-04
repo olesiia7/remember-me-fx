@@ -1,11 +1,13 @@
 package utils;
 
 import entities.Person;
+import entities.SettingsProfile;
 import lombok.NonNull;
 import tables.Events;
 import tables.EventsAndPeople;
 import tables.People;
 import tables.Pictures;
+import tables.Settings;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,18 +30,16 @@ public class KeepDataHelper {
     private final Pictures picturesTable;
     private final Events eventsTable;
     private final EventsAndPeople eventsAndPeopleTable;
-
-    public KeepDataHelper() throws ClassNotFoundException, SQLException {
-        this("src/main/java/resources/RememberMe.db");
-    }
+    private final Settings settingsTable;
 
     public KeepDataHelper(String sqlPath) throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:" + sqlPath);
+        conn = DriverManager.getConnection("jdbc:sqlite:" + sqlPath + "/RememberMe.db");
         peopleTable = new People(conn);
         picturesTable = new Pictures(conn, peopleTable);
         eventsTable = new Events(conn);
         eventsAndPeopleTable = new EventsAndPeople(conn, peopleTable, eventsTable);
+        settingsTable = new Settings(conn);
         // включаем поддержку сторонних ключей
         Statement statement = conn.createStatement();
         statement.execute("PRAGMA foreign_keys=ON");
@@ -76,6 +76,34 @@ public class KeepDataHelper {
         picturesTable.createTableIfNotExist();
         eventsTable.createTableIfNotExist();
         eventsAndPeopleTable.createTableIfNotExist();
+        settingsTable.createTableIfNotExist();
+    }
+
+    public SettingsProfile getSettings() {
+        return settingsTable.getAllSettings();
+    }
+
+    public String getDataPath() {
+        return settingsTable.getDataPath();
+    }
+
+    public int getAnswerTimeMs() {
+        return settingsTable.getAnswerTimeMs();
+    }
+
+    public int getWatchTimeMs() {
+        return settingsTable.getWatchTimeMs();
+    }
+
+    /**
+     * @param absolutePath абсолютный путь к папке, в которой нужно хранить ресурсы
+     */
+    public void setDataPathSetting(String absolutePath) {
+        settingsTable.setDataPath(absolutePath);
+    }
+
+    public void setSettings(SettingsProfile settings) {
+        settingsTable.setSettings(settings);
     }
 
     /**
@@ -153,6 +181,7 @@ public class KeepDataHelper {
         eventsTable.dropTable(conn);
         picturesTable.dropTable(conn);
         peopleTable.dropTable(conn);
+        settingsTable.dropTable(conn);
     }
 
     /**
