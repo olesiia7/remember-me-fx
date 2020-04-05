@@ -22,9 +22,9 @@ public class EditPersonWindow {
 
     public EditPersonWindow(KeepDataHelper dataHelper, Stage ownerStage, Person person) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
+        EditPersonController controller = new EditPersonController(dataHelper);
+        loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml").toURI().toURL()).openStream());
-        EditPersonController controller = loader.getController();
-        controller.setDataHelper(dataHelper);
         controller.setPerson(person);
         // передаем событие - изменены данные
         controller.addListener(() -> {

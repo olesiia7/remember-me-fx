@@ -33,6 +33,10 @@ public abstract class DefaultPersonController {
     public TextArea description;
     public HBox imageHBox;
 
+    public DefaultPersonController(KeepDataHelper dataHelper) {
+        this.dataHelper = dataHelper;
+    }
+
     @FXML
     void initialize() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -82,6 +86,20 @@ public abstract class DefaultPersonController {
         deleteImageButton.setMaxWidth(realWidth);
 
         imageLayout.getChildren().addAll(imageView, deleteImageButton);
+        return imageLayout;
+    }
+
+    VBox getImageLayoutWithOutDelete(Image image) {
+        VBox imageLayout = new VBox();
+        imageLayout.setSpacing(5);
+        imageLayout.setPadding(new Insets(10, 5, 10, 5));
+        ImageView imageView = new ImageView();
+        imageView.setFitHeight(300);
+        imageView.setFitWidth(300);
+        imageView.setImage(image);
+        imageView.setPickOnBounds(true);
+        imageView.setPreserveRatio(true);
+        imageLayout.getChildren().addAll(imageView);
         return imageLayout;
     }
 

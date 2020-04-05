@@ -1,10 +1,10 @@
 package controllers;
 
 import entities.Person;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import listeners.PersonUpdatedListener;
+import utils.KeepDataHelper;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,8 +12,11 @@ import java.sql.SQLException;
 
 public class EditPersonController extends DefaultNewOrEditPersonController {
     private Person person;
-    public ContextMenu eventsSuggester;
     private PersonUpdatedListener listener;
+
+    public EditPersonController(KeepDataHelper dataHelper) {
+        super(dataHelper);
+    }
 
     public void setPerson(Person person) {
         this.person = person;

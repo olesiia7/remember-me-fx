@@ -2,10 +2,10 @@ package controllers;
 
 import entities.Person;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import listeners.NewPersonListener;
+import utils.KeepDataHelper;
 
 import java.awt.*;
 import java.io.FileInputStream;
@@ -14,7 +14,10 @@ import java.sql.SQLException;
 
 public class CreateNewPersonController extends DefaultNewOrEditPersonController {
     public NewPersonListener listener;
-    public Button setTestData;
+
+    public CreateNewPersonController(KeepDataHelper dataHelper) {
+        super(dataHelper);
+    }
 
     @Override
     @FXML

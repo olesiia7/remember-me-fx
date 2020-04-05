@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import layoutWindow.CreatePersonWindow;
 import layoutWindow.EditDataWindow;
+import layoutWindow.PreWatchDataWindow;
 import layoutWindow.SettingsWindow;
 import utils.KeepDataHelper;
 
@@ -30,7 +31,7 @@ public class InitialFX extends Application {
         } else {
             dataHelper.setDataPathSetting(dataHelper.getDataPath());
         }
-        deleteUnusedFiles(dataHelper.getAllPictures(), recoursePath.getPath());
+        deleteUnusedFiles(dataHelper.getAllPictures(), dataHelper.getDataPath());
         Application.launch();
     }
 
@@ -56,6 +57,14 @@ public class InitialFX extends Application {
                 e.printStackTrace();
             }
         });
+        Button watchDataButton = new Button("Режим просмотра");
+        watchDataButton.setOnAction(actionEvent -> {
+            try {
+                new PreWatchDataWindow(dataHelper, stage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         Button settingsButton = new Button("Настройки");
         settingsButton.setOnAction(actionEvent -> {
             try {
@@ -64,7 +73,7 @@ public class InitialFX extends Application {
                 e.printStackTrace();
             }
         });
-        vBox.getChildren().addAll(addNewPersonButton, editDataButton, settingsButton);
+        vBox.getChildren().addAll(addNewPersonButton, editDataButton, watchDataButton, settingsButton);
         Scene scene = new Scene(vBox);
         stage.setTitle("Remember me");
         stage.setScene(scene);

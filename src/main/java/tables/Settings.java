@@ -71,6 +71,40 @@ public class Settings implements Table {
     }
 
     /**
+     * Добавляет в таблицу время в мс показа человека в режиме просмотра
+     */
+    public void setWatchTimeMs(int watchTimeMsValue) {
+        String SQL = "UPDATE " + getTableName() + " SET " +
+                watchTimeMs + "='" + watchTimeMsValue + "' " + " WHERE " + id + "=0;";
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Добавляет в таблицу время в мс показа правильного ответа в режиме самопроверки
+     */
+    public void setAnswerTimeMs(int answerTimeMsValue) {
+        String SQL = "UPDATE " + getTableName() + " SET " +
+                answerTimeMsValue + "='" + answerTimeMsValue + "' " + " WHERE " + id + "=0;";
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Добавляет в таблицу настройки сохранения
      */
     public void setDataPath(String path) {

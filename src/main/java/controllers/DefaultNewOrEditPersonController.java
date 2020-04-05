@@ -22,6 +22,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import utils.KeepDataHelper;
 
 import javax.imageio.ImageIO;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -44,6 +45,10 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     public Button setImageButton;
     public Button cancelButton;
     public Button saveButton;
+
+    public DefaultNewOrEditPersonController(KeepDataHelper dataHelper) {
+        super(dataHelper);
+    }
 
     /**
      * Добавляет кнопки "Добавить изображение", "Сохранить", "Отменить"

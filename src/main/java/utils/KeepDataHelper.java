@@ -102,6 +102,20 @@ public class KeepDataHelper {
         settingsTable.setDataPath(absolutePath);
     }
 
+    /**
+     * @param watchTimeMs время в мс показа человека в режиме просмотра
+     */
+    public void setWatchTimeMsSetting(int watchTimeMs) {
+        settingsTable.setWatchTimeMs(watchTimeMs);
+    }
+
+    /**
+     * @param answerTimeMs время в мс показа правильного ответа в режиме самопроверки
+     */
+    public void setAnswerTimeMsSetting(int answerTimeMs) {
+        settingsTable.setAnswerTimeMs(answerTimeMs);
+    }
+
     public void setSettings(SettingsProfile settings) {
         settingsTable.setSettings(settings);
     }

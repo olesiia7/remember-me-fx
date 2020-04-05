@@ -21,8 +21,9 @@ public class CreatePersonWindow {
 
     public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
+        CreateNewPersonController controller = new CreateNewPersonController(dataHelper);
+        loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/NewPerson.fxml").toURI().toURL()).openStream());
-        CreateNewPersonController controller = loader.getController();
         controller.setDataHelper(dataHelper);
         // передаем событие - создан новый пользователь
         controller.addListener(() -> {
