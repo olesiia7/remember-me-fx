@@ -47,7 +47,7 @@
       </GridPane>
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
          <children>
-            <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#save" text="Сохранить" />
+            <Button fx:id="saveButton" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#save" text="Сохранить" />
             <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#cancel" text="Отменить" />
          </children>
          <opaqueInsets>

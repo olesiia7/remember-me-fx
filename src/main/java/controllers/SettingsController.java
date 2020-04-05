@@ -2,6 +2,7 @@ package controllers;
 
 import entities.SettingsProfile;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -20,6 +21,8 @@ public class SettingsController {
     private TextField answerTimeMs;
     @FXML
     private TextField watchTimeMs;
+    @FXML
+    private Button saveButton;
 
     @FXML
     private void initialize() {
@@ -32,6 +35,10 @@ public class SettingsController {
             if (!p.matcher(newValue).matches()) watchTimeMs.setText(oldValue);
         });
 
+        dirPath.textProperty().addListener((observable, oldValue, newValue) -> {
+            saveButton.setDisable(newValue == null || newValue.isEmpty());
+        });
+
         directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Выберите папку для хранения информации");
     }
@@ -39,11 +46,13 @@ public class SettingsController {
     @FXML
     // ToDo: написать перенос данных при смене пути
     public void changeDir() {
-        directoryChooser.setInitialDirectory(new File(dirPath.getText()));
+        String path = dirPath.getText();
+        if (path != null && !path.isEmpty()) {
+            directoryChooser.setInitialDirectory(new File(path));
+        }
         File dir = directoryChooser.showDialog(getStage());
         if (dir != null) {
             dirPath.setText(dir.getAbsolutePath());
-            cancel();
         } else {
             dirPath.setText(null);
         }
@@ -61,7 +70,7 @@ public class SettingsController {
         int watchTime = Integer.parseInt(watchTimeMs.getText());
         SettingsProfile settings = new SettingsProfile(path, answerTime, watchTime);
         dataHelper.setSettings(settings);
-        refresh(settings);
+        cancel();
     }
 
     Stage getStage() {

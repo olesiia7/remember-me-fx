@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,8 +32,9 @@ public class KeepDataHelper {
     private final Events eventsTable;
     private final EventsAndPeople eventsAndPeopleTable;
     private final Settings settingsTable;
+    private final Properties properties;
 
-    public KeepDataHelper(String sqlPath) throws ClassNotFoundException, SQLException {
+    public KeepDataHelper(String sqlPath, Properties properties) throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
         conn = DriverManager.getConnection("jdbc:sqlite:" + sqlPath + "/RememberMe.db");
         peopleTable = new People(conn);
@@ -40,6 +42,7 @@ public class KeepDataHelper {
         eventsTable = new Events(conn);
         eventsAndPeopleTable = new EventsAndPeople(conn, peopleTable, eventsTable);
         settingsTable = new Settings(conn);
+        this.properties = properties;
         // включаем поддержку сторонних ключей
         Statement statement = conn.createStatement();
         statement.execute("PRAGMA foreign_keys=ON");
@@ -99,10 +102,12 @@ public class KeepDataHelper {
      * @param absolutePath абсолютный путь к папке, в которой нужно хранить ресурсы
      */
     public void setDataPathSetting(String absolutePath) {
+        properties.setProperty("data.dir", absolutePath);
         settingsTable.setDataPath(absolutePath);
     }
 
     public void setSettings(SettingsProfile settings) {
+        properties.setProperty("data.dir", settings.getDataPath());
         settingsTable.setSettings(settings);
     }
 

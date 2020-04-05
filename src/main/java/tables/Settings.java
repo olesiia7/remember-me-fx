@@ -40,7 +40,7 @@ public class Settings implements Table {
     public void createTableIfNotExist() throws SQLException {
         Statement statement = conn.createStatement();
         statement.execute("create table if not exists " + getTableName() + " (" +
-                "id int default 0 constraint settings_pk primary key, " +
+                "id int default 0, " +
                 dataPath + " text default null, " +
                 answerTimeMs + " int default 1000, " +
                 watchTimeMs + " int default 1000);");

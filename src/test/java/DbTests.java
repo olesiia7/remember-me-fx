@@ -24,7 +24,7 @@ public class DbTests {
 
     @Before
     public void setup() throws SQLException, ClassNotFoundException {
-        dataHelper = new KeepDataHelper("src/test/resources");
+        dataHelper = new KeepDataHelper("src/test/resources", null);
         dataHelper.createTablesIfNotExists(true);
         // удаление неиспользуемых картинок
         deleteUnusedFiles(EMPTY_LIST, "src/test/resources");
