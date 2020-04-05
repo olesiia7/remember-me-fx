@@ -35,6 +35,12 @@ public class WatchPeopleController extends DefaultPersonController {
     @Override
     @FXML
     void initialize() {
+        name.setEditable(false);
+        events.setEditable(false);
+        company.setEditable(false);
+        role.setEditable(false);
+        description.setEditable(false);
+
         HBox hBox = new HBox();
         Button retryButton = new Button("Начать сначала");
         retryButton.setOnAction(action -> start());
