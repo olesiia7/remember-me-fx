@@ -11,9 +11,7 @@ import layoutWindow.SettingsWindow;
 import utils.KeepDataHelper;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 import static utils.FileUtils.deleteUnusedFiles;
 
@@ -21,18 +19,17 @@ public class InitialFX extends Application {
     public static KeepDataHelper dataHelper;
 
     public static void main(String[] args) throws Exception {
-        FileInputStream fis = new FileInputStream("src/main/java/resources/config.properties");
-        Properties properties = new Properties();
-        properties.load(fis);
-
-        File recoursePath = new File(properties.getProperty("data.dir"));
+        File recoursePath = new File("src/main/java/resources");
         recoursePath.mkdir();
-        String dataAbsolutePath = recoursePath.getAbsolutePath();
-        dataHelper = new KeepDataHelper(recoursePath.getPath(), properties);
-        boolean recreateTables = Boolean.parseBoolean(properties.getProperty("recreate.tables"));
-        dataHelper.createTablesIfNotExists(recreateTables);
+        dataHelper = new KeepDataHelper(recoursePath.getPath());
+        boolean recreateAllTables = false;
+        dataHelper.createTablesIfNotExists(recreateAllTables);
         // удаление неиспользуемых картинок
-        dataHelper.setDataPathSetting(dataAbsolutePath);
+        if (recreateAllTables) {
+            dataHelper.setDataPathSetting(recoursePath.getAbsolutePath());
+        } else {
+            dataHelper.setDataPathSetting(dataHelper.getDataPath());
+        }
         deleteUnusedFiles(dataHelper.getAllPictures(), recoursePath.getPath());
         Application.launch();
     }
