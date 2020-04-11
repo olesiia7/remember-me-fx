@@ -12,9 +12,9 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 public class SettingsController {
+    private final KeepDataHelper dataHelper;
+    @FXML
     public TextField dirPath;
-    private Stage stage;
-    public KeepDataHelper dataHelper;
     private DirectoryChooser directoryChooser;
 
     @FXML
@@ -24,8 +24,14 @@ public class SettingsController {
     @FXML
     private Button saveButton;
 
+    public SettingsController(KeepDataHelper dataHelper, Stage stage) {
+        this.dataHelper = dataHelper;
+    }
+
     @FXML
     private void initialize() {
+        SettingsProfile settings = dataHelper.getSettings();
+        refresh(settings);
         // ограничение ввода не цифр и не точки
         Pattern p = Pattern.compile("(\\d+)?");
         answerTimeMs.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -75,21 +81,6 @@ public class SettingsController {
 
     Stage getStage() {
         return (Stage) answerTimeMs.getScene().getWindow();
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
-    /**
-     * Добавляет класс и выстанавливает значения
-     *
-     * @param dataHelper dataHelper
-     */
-    public void setDataHelper(KeepDataHelper dataHelper) {
-        this.dataHelper = dataHelper;
-        SettingsProfile settings = dataHelper.getSettings();
-        refresh(settings);
     }
 
     private void refresh(SettingsProfile settings) {

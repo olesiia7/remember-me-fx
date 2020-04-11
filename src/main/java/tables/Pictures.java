@@ -31,8 +31,7 @@ public class Pictures implements Table {
     }
 
     @Override
-    public void createTableIfNotExist() throws SQLException {
-        Statement statement = conn.createStatement();
+    public void createTableIfNotExist() {
         String SQL = "create table if not exists " + getTableName() + " (" +
                 Pictures.id + " integer constraint picture_pk primary key autoincrement, " +
                 Pictures.path + " text not null, " +
@@ -40,15 +39,14 @@ public class Pictures implements Table {
                 "foreign key (" + Pictures.person_id + ")" +
                 " references " + peopleTable.getTableName() + "(" + People.id + ")" +
                 " ON DELETE CASCADE ON UPDATE CASCADE);";
-        statement.execute(SQL);
-        statement.close();
+        executeSQL(conn, SQL);
     }
 
     /**
      * Добавляет в таблицу картинки человека
      *
      * @param person человек с выставленным id
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     // ToDo: написать массовую вставку изображений
     public void setPersonPictures(Person person) throws SQLException {
@@ -71,7 +69,7 @@ public class Pictures implements Table {
      * Удаляет старые и добавляет новые записи о изображениях пользователя
      *
      * @param person человек с выставленным id
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     public void updatePersonPictures(Person person) throws SQLException {
         deletePersonPictures(person.getId());
@@ -84,16 +82,7 @@ public class Pictures implements Table {
      */
     private void deletePersonPictures(int personId) {
         String SQL = "delete from " + getTableName() + " where " + person_id + " = " + personId + ";";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
-
+        executeSQL(conn, SQL);
     }
 
     public List<String> getPersonPictures(int personId) {
@@ -107,6 +96,8 @@ public class Pictures implements Table {
                 pictures.add(resultSet.getString(path));
             }
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return pictures;
@@ -117,15 +108,18 @@ public class Pictures implements Table {
      */
     public List<String> getAllPictures() {
         List<String> pictures = new ArrayList<>();
+        String SQL = "select * from " + getTableName() + ";";
         try {
             Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from " + getTableName() + ";");
+            ResultSet resultSet = statement.executeQuery(SQL);
             while (resultSet.next()) {
                 pictures.add(resultSet.getString(path));
             }
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return pictures;

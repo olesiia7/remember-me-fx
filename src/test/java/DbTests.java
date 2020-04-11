@@ -75,7 +75,7 @@ public class DbTests {
         // проверяем, что пользователи и мероприятия созданы
         List<Person> savedPeople = dataHelper.getSavedPeople();
         assertEquals(2, savedPeople.size());
-        List<String> events = dataHelper.getAllEvents();
+        List<String> events = dataHelper.getAllEventNames();
         assertEquals(2, events.size());
 
         // проверяем, что остался только 1 пользователь
@@ -92,7 +92,7 @@ public class DbTests {
         Set<String> existPersonEvents = dataHelper.getPersonEvents(existPersonId);
         assertEquals(1, existPersonEvents.size());
         assertEquals(existPersonEvents, new HashSet<>(singletonList("Мероприятие2")));
-        assertEquals(1, dataHelper.getAllEvents().size());
+        assertEquals(1, dataHelper.getAllEventNames().size());
     }
 
     /**
@@ -124,7 +124,7 @@ public class DbTests {
         assertEquals(expectedUpdatedPerson.getName(), updatedPerson.getName());
         assertEquals(expectedUpdatedPerson.getPictures(), updatedPerson.getPictures());
         assertEquals(expectedUpdatedPerson.getEvents(), updatedPerson.getEvents());
-        List<String> allEvents = dataHelper.getAllEvents();
+        List<String> allEvents = dataHelper.getAllEventNames();
         assertEquals(3, allEvents.size());
     }
 

@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -121,10 +122,51 @@ public class KeepDataHelper {
     }
 
     /**
-     * @return список всех мероприятий
+     * @return список названий всех мероприятий
      */
-    public List<String> getAllEvents() {
+    public List<String> getAllEventNames() {
+        return eventsTable.getAllEventNames();
+    }
+
+    /**
+     * @return id и названия всех мероприятий
+     */
+    public Map<Integer, String> getAllEvents() {
         return eventsTable.getAllEvents();
+    }
+
+    /**
+     * @return количество участников мероприятия
+     */
+    public int getCountEventsByEventId(int eventId) {
+        return eventsAndPeopleTable.getCountEventsByEventId(eventId);
+    }
+
+    /**
+     * @param eventId id события, которое нужно удалить
+     */
+    public void deleteEvent(int eventId) {
+        eventsTable.deleteEvent(eventId);
+    }
+
+    /**
+     * Переименовывает мероприятие
+     *
+     * @param eventId      id события
+     * @param newEventName новое имя мероприятия
+     */
+    public void setEventName(int eventId, String newEventName) {
+        eventsTable.setNewEventName(eventId, newEventName);
+    }
+
+    /**
+     * Удаляет событие из выбранных пользователей
+     *
+     * @param eventId      id события, которое нужно удалить
+     * @param participants id людей, у которых надо удалить событие
+     */
+    public void deleteEventsFromPeople(int eventId, List<Integer> participants) {
+        eventsAndPeopleTable.deleteEventsFromPeople(eventId, participants);
     }
 
     /**
@@ -180,6 +222,8 @@ public class KeepDataHelper {
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(sqlBuilder.toString());
             e.printStackTrace();
         }
         return people;
@@ -187,10 +231,8 @@ public class KeepDataHelper {
 
     /**
      * Удаляет все возможные таблицы
-     *
-     * @throws SQLException
      */
-    private void dropAllTables() throws SQLException {
+    private void dropAllTables() {
         eventsAndPeopleTable.dropTable(conn);
         eventsTable.dropTable(conn);
         picturesTable.dropTable(conn);
@@ -226,6 +268,16 @@ public class KeepDataHelper {
         picturesTable.setPersonPictures(person);
         Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person.getEvents());
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
+    }
+
+    /**
+     * Добавляет человека в указанные мероприятия
+     *
+     * @param personId id человека, которого нужно добавить в мероприятия
+     * @param eventIds список id мероприятий
+     */
+    public void addEventsToPerson(int personId, Set<Integer> eventIds) {
+        eventsAndPeopleTable.addPersonEvents(personId, eventIds);
     }
 
     /**
@@ -267,9 +319,18 @@ public class KeepDataHelper {
      * @return
      */
     public void deletePeople(@NonNull List<Integer> ids) {
+        deletePeopleWithoutEvent(ids);
+        eventsAndPeopleTable.deleteUnusedEvents();
+    }
+
+    /**
+     * Удаляет людей, но оставляет мероприятие, даже если в нем нет участников
+     *
+     * @return
+     */
+    public void deletePeopleWithoutEvent(@NonNull List<Integer> ids) {
         deletePeoplePictures(ids);
         peopleTable.deletePerson(ids);
-        eventsAndPeopleTable.deleteUnusedEvents();
     }
 
     /**

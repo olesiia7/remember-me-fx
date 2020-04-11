@@ -29,7 +29,7 @@ public class CreatePersonWindow {
         controller.addListener(() -> {
             if (listener != null) listener.newPersonCreated();
         });
-        List<String> allEvents = new ArrayList<>(dataHelper.getAllEvents());
+        List<String> allEvents = new ArrayList<>(dataHelper.getAllEventNames());
         controller.setEventsList(allEvents);
 
         Stage stage = new Stage();

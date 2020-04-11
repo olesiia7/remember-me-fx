@@ -1,7 +1,9 @@
 package controllers;
 
+import entities.EventInfo;
 import entities.Person;
 import javafx.fxml.FXML;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -11,14 +13,13 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 public class EditDataController {
-    private KeepDataHelper dataHelper;
-    private Stage stage;
-
     @FXML
     public TabPane tabPanel;
 
     // редактирование людей
-    private EditPeopleTabController peopleTab;
+    private final EditPeopleTabController peopleTab;
+    @FXML
+    private Tab editPeopleTab;
     @FXML
     private HBox filterPanel;
     @FXML
@@ -40,21 +41,42 @@ public class EditDataController {
     @FXML
     private TableColumn<Person, String> deleteColumn;
 
+    // редактирование мероприятий
+    private final EditEventsTabController eventsTab;
+    @FXML
+    private Tab editEventsTab;
+    @FXML
+    private TableView<EventInfo> tableEvents;
+    @FXML
+    private TableColumn<EventInfo, String> eventNameColumn;
+    @FXML
+    private TableColumn<EventInfo, String> eventsCountColumn;
+    @FXML
+    private TableColumn<EventInfo, String> eventEditColumn;
+    @FXML
+    private TableColumn<EventInfo, String> eventDeleteColumn;
+
     public EditDataController(KeepDataHelper dataHelper, Stage stage) {
-        this.dataHelper = dataHelper;
-        this.stage = stage;
         peopleTab = new EditPeopleTabController(stage, dataHelper);
+        eventsTab = new EditEventsTabController(stage, dataHelper);
     }
 
     // инициализируем форму данными
     @FXML
     private void initialize() {
-        peopleTab.initialize(tabPanel, filterPanel, tablePeople,
+        peopleTab.initialize(tabPanel, editPeopleTab, filterPanel, tablePeople,
                 picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn, editColumn, deleteColumn);
+        eventsTab.initialize(tabPanel, editEventsTab, tableEvents, eventNameColumn, eventsCountColumn, eventEditColumn, eventDeleteColumn);
     }
 
     @FXML
     public void addNewPerson() {
         peopleTab.addNewPerson();
+    }
+
+    @FXML
+    //ToDo: написать метод добавления нового Мероприятия
+    public void createNewEvent() {
+//        peopleTab.addNewPerson();
     }
 }

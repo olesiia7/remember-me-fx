@@ -8,8 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Events implements Table {
@@ -36,17 +38,15 @@ public class Events implements Table {
     }
 
     @Override
-    public void createTableIfNotExist() throws SQLException {
-        Statement statement = conn.createStatement();
-        statement.execute("create table if not exists " + getTableName() + " (" +
+    public void createTableIfNotExist() {
+        String SQL = "create table if not exists " + getTableName() + " (" +
                 Events.id + " integer constraint event_pk primary key autoincrement, " +
-                Events.name + " text not null);");
-        statement.close();
+                Events.name + " text not null);";
+        executeSQL(conn, SQL);
     }
 
     /**
      * Добавляет в таблицу мероприятия человека
-     *
      *
      * @param newEvents@throws SQLException
      */
@@ -74,11 +74,11 @@ public class Events implements Table {
     /**
      * @return весь список существующих мероприятий
      */
-    public List<String> getAllEvents() {
+    public List<String> getAllEventNames() {
         List<String> allEvents = new ArrayList<>();
+        String SQL = "Select " + name + " from " + getTableName() + " order by " + name + ";";
         try {
             Statement statement = conn.createStatement();
-            String SQL = "Select " + name + " from " + getTableName() + " order by " + name + ";";
             ResultSet resultSet = statement.executeQuery(SQL);
             while (resultSet.next()) {
                 allEvents.add(resultSet.getString(name));
@@ -86,6 +86,30 @@ public class Events implements Table {
             statement.close();
             resultSet.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+        return allEvents;
+    }
+
+    /**
+     * @return весь список существующих мероприятий
+     */
+    public Map<Integer, String> getAllEvents() {
+        Map<Integer, String> allEvents = new HashMap<>();
+        String SQL = "Select * from " + getTableName() + " order by " + name + ";";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(SQL);
+            while (resultSet.next()) {
+                allEvents.put(resultSet.getInt(id), resultSet.getString(name));
+            }
+            statement.close();
+            resultSet.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return allEvents;
@@ -109,7 +133,7 @@ public class Events implements Table {
     /**
      * @param eventName название мероприятия
      * @return id только что созданного мероприятия
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     private int getEventId(@NonNull String eventName) throws SQLException {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
@@ -121,5 +145,27 @@ public class Events implements Table {
         resultSet.close();
         ps.close();
         return eventId;
+    }
+
+    /**
+     * @param eventId id события, которое нужно удалить
+     */
+    public void deleteEvent(int eventId) {
+        String SQL = "DELETE FROM " + getTableName() +
+                " WHERE " + id + "=" + eventId + ";";
+        executeSQL(conn, SQL);
+    }
+
+    /**
+     * Переименовывает мероприятие
+     *
+     * @param eventId      id события
+     * @param newEventName новое имя мероприятия
+     */
+    public void setNewEventName(int eventId, String newEventName) {
+        String SQL = "UPDATE " + getTableName() +
+                " SET " + name + "='" + newEventName + "'" +
+                " WHERE " + id + "=" + eventId + ";";
+        executeSQL(conn, SQL);
     }
 }

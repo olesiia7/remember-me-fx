@@ -34,23 +34,22 @@ public class People implements Table {
     }
 
     @Override
-    public void createTableIfNotExist() throws SQLException {
-        Statement statement = conn.createStatement();
-        statement.execute("create table if not exists " + getTableName() + "(" +
+    public void createTableIfNotExist() {
+        String SQL = "create table if not exists " + getTableName() + "(" +
                 People.id + " integer constraint people_pk primary key autoincrement, " +
                 People.name + " text, " +
                 People.company + " text, " +
                 People.role + " text, " +
                 People.description + " text, " +
-                People.remembered + " boolean default false);");
-        statement.close();
+                People.remembered + " boolean default false);";
+        executeSQL(conn, SQL);
     }
 
     /**
      * Сохраняет человека в таблицу
      *
      * @param person человек, которого нужно сохранить
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     public void savePersonAndGetId(Person person) throws SQLException {
         String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutIdAndRemembered() + ") " +
@@ -66,7 +65,6 @@ public class People implements Table {
      * Перезаписывает данные пользователя
      *
      * @param person человек, которого нужно сохранить
-     * @throws SQLException
      */
     // ToDo: сделать перезапись только измененных данных
     public void updatePerson(Person person) {
@@ -76,15 +74,7 @@ public class People implements Table {
                 role + " = " + getFieldWithQuote(person.getRole()) + ", " +
                 description + " = " + getFieldWithQuote(person.getDescription()) +
                 " WHERE " + id + " = " + person.getId();
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
     }
 
     private String getFieldWithQuote(String s) {
@@ -96,13 +86,16 @@ public class People implements Table {
      */
     public List<Person> getAllPeople() {
         List<Person> people = new ArrayList<>();
+        String SQL = "Select * from " + getTableName() + ";";
         try {
             Statement statement = conn.createStatement();
-            ResultSet peopleResultSet = statement.executeQuery("Select * from " + getTableName() + ";");
+            ResultSet peopleResultSet = statement.executeQuery(SQL);
             people.addAll(getPeopleFromResultSet(peopleResultSet));
             statement.close();
             peopleResultSet.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return people;
@@ -125,6 +118,8 @@ public class People implements Table {
                 statement.close();
                 peopleResultSet.close();
             } catch (SQLException e) {
+                System.out.println("Ошибка при исполнении SQL:");
+                System.out.println(SQLBuilder.toString());
                 e.printStackTrace();
             }
         }
@@ -136,7 +131,7 @@ public class People implements Table {
      *
      * @param rs ResultSet, из которого надо вытянуть данные
      * @return данные о людях из таблицы
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     @NonNull
     public static List<Person> getPeopleFromResultSet(@NonNull ResultSet rs) throws SQLException {
@@ -159,7 +154,7 @@ public class People implements Table {
      *
      * @param person person, который нужно вставить
      * @param ps     PreparedStatement, куда нужно вставить данные
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     private static void setPersonInfo(@NonNull Person person, @NonNull PreparedStatement ps) throws SQLException {
         ps.setString(1, person.getName());
@@ -172,7 +167,7 @@ public class People implements Table {
      * Достает id только что созданного человека и сохраняет его
      *
      * @param person данные, по которым нужно найти id
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     private void setPersonId(@NonNull Person person) throws SQLException {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
@@ -197,15 +192,19 @@ public class People implements Table {
     @NonNull
     public List<String> getAllCompanies() {
         List<String> companies = new ArrayList<>();
+        String SQL = "Select distinct " + company +
+                " from " + getTableName() + " order by " + company + ";";
         try {
             Statement statement = conn.createStatement();
-            ResultSet companiesResultSet = statement.executeQuery("Select distinct " + company + " from " + getTableName() + ";");
+            ResultSet companiesResultSet = statement.executeQuery(SQL);
             while (companiesResultSet.next()) {
                 companies.add(companiesResultSet.getString(company));
             }
             statement.close();
             companiesResultSet.close();
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return companies;
@@ -215,15 +214,8 @@ public class People implements Table {
         if (ids.isEmpty()) {
             return;
         }
-        StringBuilder sql = new StringBuilder();
-        sql.append("delete from ").append(getTableName()).append(" where ").append(id).append(" in(");
-        sql.append(ids.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(sql.toString());
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "delete from " + getTableName() + " where " + id + " in(" +
+                ids.stream().map(Object::toString).collect(Collectors.joining(",")) + ")";
+        executeSQL(conn, sql);
     }
 }

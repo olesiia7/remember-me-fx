@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -43,15 +44,14 @@ public class EventsAndPeople implements Table {
     }
 
     @Override
-    public void createTableIfNotExist() throws SQLException {
-        Statement statement = conn.createStatement();
-        statement.execute("create table if not exists " + getTableName() + " (" +
+    public void createTableIfNotExist() {
+        String SQL = "create table if not exists " + getTableName() + " (" +
                 personIdField + " integer not null, " +
                 eventIdField + " integer not null, " +
                 "foreign key (" + personIdField + ") references " + peopleTable.getTableName() + "(" + People.id + ") ON DELETE CASCADE " +
                 "foreign key (" + eventIdField + ") references " + eventsTable.getTableName() + "(" + Events.id + ") " +
-                "ON DELETE CASCADE);");
-        statement.close();
+                "ON DELETE CASCADE);";
+        executeSQL(conn, SQL);
     }
 
     /**
@@ -59,22 +59,40 @@ public class EventsAndPeople implements Table {
      *
      * @param personId id человека
      * @param eventIds список id ероприятий
-     * @throws SQLException
      */
-    // ToDo: написать массовую вставку мероприятий
-    public void addPersonEvents(int personId, Set<Integer> eventIds) throws SQLException {
+    public void addPersonEvents(int personId, Set<Integer> eventIds) {
         if (eventIds.isEmpty()) {
             return;
         }
-        String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutId() + ") " +
-                "VALUES (?, ?);";
-        for (int eventId : eventIds) {
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            ps.setInt(1, personId);
-            ps.setInt(2, eventId);
-            ps.execute();
-            ps.close();
+        // оставляем только те события, которые уже есть
+        Set<Integer> notExistEventIds = new HashSet<>();
+        for (Integer eventId : eventIds) {
+            String SQL = "SELECT * FROM " + getTableName() +
+                    " WHERE " + personIdField + "=" + personId + " AND " + eventIdField + "=" + eventId + ";";
+            try {
+                Statement statement = conn.createStatement();
+                ResultSet resultSet = statement.executeQuery(SQL);
+                if (!resultSet.next()) {
+                    notExistEventIds.add(eventId);
+                }
+            } catch (SQLException e) {
+                System.out.println("Ошибка при исполнении SQL:");
+                System.out.println(SQL);
+                e.printStackTrace();
+            }
         }
+        // если все мероприятия есть, ничего не делать
+        if (notExistEventIds.isEmpty()) {
+            return;
+        }
+        StringBuilder SQL = new StringBuilder().append("INSERT INTO ").append(getTableName()).append(" (").append(getFieldNames()).append(") ")
+                .append("VALUES ");
+        List<String> values = new ArrayList<>();
+        for (Integer notExistEventId : notExistEventIds) {
+            values.add("(" + personId + "," + notExistEventId + ")");
+        }
+        SQL.append(String.join(",", values)).append(";");
+        executeSQL(conn, SQL.toString());
     }
 
     /**
@@ -99,9 +117,34 @@ public class EventsAndPeople implements Table {
                 events.add(resultSet.getString(Events.name));
             }
         } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
             e.printStackTrace();
         }
         return events;
+    }
+
+    /**
+     * @param eventId id мероприятия
+     * @return кол-во участников мероприятия
+     */
+    public int getCountEventsByEventId(int eventId) {
+        int participantsCount = 0;
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("select count(*) from ").append(getTableName())
+                .append(" where ")
+                .append(eventIdField).append("=").append(eventId).append(";");
+        try {
+            PreparedStatement ps = conn.prepareStatement(SQL.toString());
+            ResultSet resultSet = ps.executeQuery();
+            resultSet.next();
+            participantsCount = resultSet.getInt("count(*)");
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+        return participantsCount;
     }
 
     public Set<String> getPersonEvents(int personId) {
@@ -125,7 +168,7 @@ public class EventsAndPeople implements Table {
         }
     }
 
-    public static String getFieldNamesWithoutId() {
+    public static String getFieldNames() {
         return personIdField + appendWithDelimiter(eventIdField);
     }
 
@@ -136,15 +179,7 @@ public class EventsAndPeople implements Table {
         String SQL = "delete from " + eventsTable.getTableName() + " where " + Events.id + " in (SELECT " + Events.id +
                 " FROM " + eventsTable.getTableName() + " LEFT JOIN " + getTableName() +
                 " ON " + eventsTable.getId() + "=" + getEventIdField() + " WHERE " + getEventIdField() + " is null);";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
     }
 
     /**
@@ -160,15 +195,23 @@ public class EventsAndPeople implements Table {
                 " WHERE " + Events.name +
                 " in('" + String.join("','", eventsToDelete) + "')) " +
                 "AND " + personIdField + "=" + personId + ";";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
         deleteUnusedEvents();
+    }
+
+    /**
+     * Удаляет событие из выбранных пользователей
+     *
+     * @param eventId      id события, которое нужно удалить
+     * @param participants id людей, у которых надо удалить событие
+     */
+    public void deleteEventsFromPeople(int eventId, List<Integer> participants) {
+        String partIds = participants.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+        String SQL = "DELETE FROM " + getTableName() +
+                " WHERE " + eventIdField + "=" + eventId +
+                " AND " + personIdField + " in(" + partIds + ");";
+        executeSQL(conn, SQL);
     }
 }

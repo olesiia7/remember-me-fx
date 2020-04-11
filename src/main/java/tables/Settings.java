@@ -93,15 +93,7 @@ public class Settings implements Table {
     public void setAnswerTimeMs(int answerTimeMsValue) {
         String SQL = "UPDATE " + getTableName() + " SET " +
                 answerTimeMsValue + "='" + answerTimeMsValue + "' " + " WHERE " + id + "=0;";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
     }
 
     /**
@@ -110,15 +102,7 @@ public class Settings implements Table {
     public void setDataPath(String path) {
         String SQL = "UPDATE " + getTableName() + " SET " +
                 dataPath + "='" + path + "' " + " WHERE " + id + "=0;";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
     }
 
     /**

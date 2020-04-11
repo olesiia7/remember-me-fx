@@ -4,7 +4,6 @@ import entities.Person;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -17,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static javafx.scene.control.Alert.AlertType.ERROR;
-import static javafx.scene.control.Alert.AlertType.INFORMATION;
+import static utils.AlertUtils.showErrorAlert;
+import static utils.AlertUtils.showInformationAlert;
 
 public class PreWatchPeopleController {
     private final KeepDataHelper dataHelper;
@@ -46,7 +45,7 @@ public class PreWatchPeopleController {
         });
 
         final ObservableList<String> allEvents = FXCollections.observableArrayList();
-        allEvents.addAll(dataHelper.getAllEvents());
+        allEvents.addAll(dataHelper.getAllEventNames());
 
         final ObservableList<String> allCompanies = FXCollections.observableArrayList();
         allCompanies.addAll(dataHelper.getAllCompanies());
@@ -72,17 +71,10 @@ public class PreWatchPeopleController {
         ObservableList<String> eventsItems = eventsFilter.getCheckModel().getCheckedItems();
         List<Person> people = new ArrayList<>(dataHelper.getPeopleByCriteria(eventsItems, companiesItems));
         if (people.isEmpty()) {
-            Alert alert = new Alert(ERROR);
-            alert.setTitle("Ошибка");
-            alert.setHeaderText(null);
-            alert.setContentText("Под выбранный фильтр не подходит ни один человек");
-            alert.showAndWait();
+            showErrorAlert("Под выбранный фильтр не подходит ни один человек");
         } else {
-            Alert alert = new Alert(INFORMATION);
-            alert.setTitle("Переход к просмотру");
-            alert.setHeaderText(null);
-            alert.setContentText("Приготовьтесь к просмотру! Вам будут показаны " + people.size() + " человек(а)");
-            alert.showAndWait();
+            showInformationAlert("Переход к просмотру",
+                    "Приготовьтесь к просмотру! Вам будут показаны " + people.size() + " человек(а)");
             getStage().close();
             new WatchDataWindow(dataHelper, getStage(), watchTimeMsValue, people);
         }

@@ -2,18 +2,16 @@ package controllers;
 
 import com.google.common.collect.ImmutableList;
 import entities.Person;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -24,16 +22,16 @@ import layoutWindow.EditPersonWindow;
 import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static entities.DefaultPeopleTable.fillDefaultFields;
+
 public class EditPeopleTabController {
-    private Stage stage;
-    private KeepDataHelper dataHelper;
+    private final Stage stage;
+    private final KeepDataHelper dataHelper;
 
     public TabPane tabPanel;
 
@@ -51,6 +49,7 @@ public class EditPeopleTabController {
     }
 
     protected void initialize(TabPane tabPanel,
+                              Tab editPeopleTab,
                               HBox filterPanel,
                               TableView<Person> tablePeople,
                               TableColumn<Person, ImageView> picColumn,
@@ -67,30 +66,7 @@ public class EditPeopleTabController {
         this.tablePeople = tablePeople;
 
         // устанавливаем тип и значение которое должно хранится в колонке
-        picColumn.setCellValueFactory(cellData -> {
-            List<String> pictures = cellData.getValue().getPictures();
-            if (pictures != null && !pictures.isEmpty()) {
-                String path = pictures.get(0);
-                try {
-                    Image image = new Image(new FileInputStream(path));
-                    ImageView imageView = new ImageView(image);
-                    imageView.setPickOnBounds(true);
-                    imageView.setPreserveRatio(true);
-                    imageView.setFitWidth(100);
-                    imageView.setFitHeight(100);
-                    return new SimpleObjectProperty<>(imageView);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        });
-        picColumn.setPrefWidth(60);
-        nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        eventsColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.join(",", cellData.getValue().getEvents())));
-        companyColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCompany()));
-        roleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRole()));
-        descriptionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
+        fillDefaultFields(picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn);
 
         Callback<TableColumn<Person, String>, TableCell<Person, String>> cellFactory
                 = new Callback<TableColumn<Person, String>, TableCell<Person, String>>() {
@@ -110,7 +86,7 @@ public class EditPeopleTabController {
                                 System.out.println(person);
                                 try {
                                     EditPersonWindow editPersonWindow = new EditPersonWindow(dataHelper, stage, person);
-                                    editPersonWindow.addListener(EditPeopleTabController.this::refreshFilters);
+                                    editPersonWindow.addListener(EditPeopleTabController.this::refreshData);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -139,7 +115,7 @@ public class EditPeopleTabController {
                             btn.setOnAction(event -> {
                                 Person person = getTableView().getItems().get(getIndex());
                                 dataHelper.deletePeople(Collections.singletonList(person.getId()));
-                                refreshFilters();
+                                refreshData();
                             });
                             setGraphic(btn);
                         }
@@ -155,7 +131,13 @@ public class EditPeopleTabController {
         companiesFilter.setPrefWidth(240);
         setCheckComboBoxListeners(eventsFilter, companiesFilter);
         filterPanel.getChildren().addAll(eventsFilter, new Label("по работодателю:"), companiesFilter);
-        refreshFilters();
+        refreshData();
+        // обновляем при переключении на вкладку
+        editPeopleTab.setOnSelectionChanged(event -> {
+            if (editPeopleTab.isSelected()) {
+                refreshData();
+            }
+        });
     }
 
     @SafeVarargs
@@ -238,15 +220,15 @@ public class EditPeopleTabController {
         try {
             CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, stage);
             // обновляем таблицу при новом пользователе
-            createPersonWindow.addListener(this::refreshFilters);
+            createPersonWindow.addListener(this::refreshData);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void refreshFilters() {
+    private void refreshData() {
         final ObservableList<String> allEvents = FXCollections.observableArrayList();
-        allEvents.addAll(dataHelper.getAllEvents());
+        allEvents.addAll(dataHelper.getAllEventNames());
 
         final ObservableList<String> allCompanies = FXCollections.observableArrayList();
         allCompanies.addAll(dataHelper.getAllCompanies());

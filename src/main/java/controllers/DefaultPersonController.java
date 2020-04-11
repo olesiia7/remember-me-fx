@@ -55,12 +55,7 @@ public abstract class DefaultPersonController {
         VBox imageLayout = new VBox();
         imageLayout.setSpacing(5);
         imageLayout.setPadding(new Insets(10, 5, 10, 5));
-        ImageView imageView = new ImageView();
-        imageView.setFitHeight(300);
-        imageView.setFitWidth(300);
-        imageView.setImage(image);
-        imageView.setPickOnBounds(true);
-        imageView.setPreserveRatio(true);
+        ImageView imageView = createImageView(image);
         // открыть изображение при нажатии на него
         imageView.addEventHandler(MOUSE_CLICKED, event -> {
             event.consume();
@@ -93,14 +88,19 @@ public abstract class DefaultPersonController {
         VBox imageLayout = new VBox();
         imageLayout.setSpacing(5);
         imageLayout.setPadding(new Insets(10, 5, 10, 5));
+        ImageView imageView = createImageView(image);
+        imageLayout.getChildren().addAll(imageView);
+        return imageLayout;
+    }
+
+    private ImageView createImageView(Image image) {
         ImageView imageView = new ImageView();
         imageView.setFitHeight(300);
         imageView.setFitWidth(300);
         imageView.setImage(image);
         imageView.setPickOnBounds(true);
         imageView.setPreserveRatio(true);
-        imageLayout.getChildren().addAll(imageView);
-        return imageLayout;
+        return imageView;
     }
 
     /**

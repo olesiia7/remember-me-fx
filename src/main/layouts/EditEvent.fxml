@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="751.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <BorderPane>
+         <left>
+            <HBox spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Назввание:" />
+                  <TextField fx:id="eventName" prefWidth="250.0" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </HBox>
+         </left>
+         <right>
+            <HBox spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Численность:" />
+                  <TextField fx:id="partCount" editable="false" prefWidth="40.0" />
+               </children>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </HBox>
+         </right>
+      </BorderPane>
+      <BorderPane>
+         <right>
+            <HBox spacing="5.0" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <children>
+                  <Button mnemonicParsing="false" onAction="#replaceParticipants" text="Перенести участников" />
+                  <Button mnemonicParsing="false" onAction="#deleteParticipants" text="Удалить" />
+               </children>
+            </HBox>
+         </right>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </padding>
+         <left>
+            <HBox spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#selectAll" text="Выбрать все" />
+                  <Button mnemonicParsing="false" onAction="#unselectAll" text="Снять все" />
+               </children>
+            </HBox>
+         </left>
+      </BorderPane>
+      <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0">
+         <columns>
+            <TableColumn fx:id="selectedColumn" prefWidth="33.0" style="-fx-alignment: CENTER;" />
+            <TableColumn fx:id="picColumn" prefWidth="185.0" style="-fx-alignment: CENTER;" text="Изображение" />
+            <TableColumn fx:id="nameColumn" prefWidth="123.0" style="-fx-alignment: CENTER-LEFT;" text="ФИО" />
+            <TableColumn fx:id="eventsColumn" minWidth="-1.0" prefWidth="100.0" style="-fx-alignment: CENTER-LEFT;" text="Мероприятия" />
+            <TableColumn fx:id="companyColumn" prefWidth="118.0" style="-fx-alignment: CENTER-LEFT;" text="Место работы" />
+            <TableColumn fx:id="roleColumn" prefWidth="93.0" style="-fx-alignment: CENTER-LEFT;" text="Должность" />
+            <TableColumn fx:id="descriptionColumn" prefWidth="119.0" style="-fx-alignment: CENTER-LEFT;" text="Описание" />
+         </columns>
+      </TableView>
+      <AnchorPane>
+         <children>
+            <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#saveEvent" text="Сохранить" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>

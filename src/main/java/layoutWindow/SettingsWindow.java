@@ -17,11 +17,9 @@ public class SettingsWindow {
     public SettingsWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader();
+        SettingsController controller = new SettingsController(dataHelper, stage);
+        loader.setController(controller);
         VBox content = loader.load(requireNonNull(new File("src/main/layouts/Settings.fxml").toURI().toURL().openStream()));
-        SettingsController controller = loader.getController();
-        controller.setStage(stage);
-
-        controller.setDataHelper(dataHelper);
 
         stage.initOwner(ownerStage);
         Scene scene = new Scene(content);

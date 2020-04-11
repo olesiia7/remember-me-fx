@@ -1,6 +1,7 @@
 package controllers;
 
 import entities.Person;
+import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import listeners.PersonUpdatedListener;
@@ -11,15 +12,17 @@ import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
 public class EditPersonController extends DefaultNewOrEditPersonController {
-    private Person person;
+    private final Person person;
     private PersonUpdatedListener listener;
 
-    public EditPersonController(KeepDataHelper dataHelper) {
+    public EditPersonController(KeepDataHelper dataHelper, Person person) {
         super(dataHelper);
+        this.person = person;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    @FXML
+    protected void initialize() {
+        super.initialize();
         // заполняем данными человека
         name.setText(person.getName());
         events.setText(String.join(",", person.getEvents()));

@@ -9,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import listeners.PersonUpdatedListener;
 import utils.KeepDataHelper;
 
 import java.io.FileInputStream;
@@ -19,7 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class WatchPeopleController extends DefaultPersonController {
-    private PersonUpdatedListener listener;
     private final int watchTimeMs;
     private final List<Person> people;
     private int i = 0;
@@ -106,31 +104,4 @@ public class WatchPeopleController extends DefaultPersonController {
 
     @FXML
     public void getSuggestions() {}
-
-//    /**
-//     * При сохранении записывает в БД нового человека
-//     */
-//    @Override
-//    public void save() {
-//        Person updatedPerson = createPersonFromFields();
-//        updatedPerson.setId(person.getId());
-//        try {
-//            dataHelper.updatePerson(updatedPerson);
-//            // уведомить, что данные пользователя обновились
-//            if (listener != null) {
-//                listener.personUpdated();
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Ошибки при записи в файл");
-//            e.printStackTrace();
-//        }
-//        getStage().close();
-//    }
-
-    /**
-     * @param listener добавляет слушатель, если изменены данные пользователя
-     */
-    public void addListener(PersonUpdatedListener listener) {
-        this.listener = listener;
-    }
 }

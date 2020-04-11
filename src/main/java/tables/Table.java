@@ -14,7 +14,7 @@ public interface Table {
     /**
      * Создает таблицу, если ее нет
      *
-     * @throws SQLException
+     * @throws SQLException sql exception
      */
     void createTableIfNotExist() throws SQLException;
 
@@ -22,15 +22,24 @@ public interface Table {
      * Удаляет таблицу, если существует
      *
      * @param conn connection
-     * @throws SQLException
      */
-    default void dropTable(Connection conn) throws SQLException {
-        Statement statement = conn.createStatement();
-        statement.execute("drop table if exists " + getTableName() + ";");
-        statement.close();
+    default void dropTable(Connection conn) {
+        executeSQL(conn, "drop table if exists " + getTableName() + ";");
     }
 
     static String appendWithDelimiter(String s) {
         return "," + s;
+    }
+
+    default void executeSQL(Connection conn, String SQL) {
+        try {
+            Statement statement = conn.createStatement();
+            statement.execute(SQL);
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
     }
 }

@@ -1,7 +1,7 @@
 package layoutWindow;
 
-import controllers.EditPersonController;
-import entities.Person;
+import controllers.EditEventController;
+import entities.EventInfo;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -12,35 +12,29 @@ import utils.KeepDataHelper;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class EditPersonWindow {
+public class EditEventWindow {
     private PersonUpdatedListener listener;
 
-    public EditPersonWindow(KeepDataHelper dataHelper, Stage ownerStage, Person person) throws HeadlessException, IOException {
+    public EditEventWindow(KeepDataHelper dataHelper, Stage ownerStage, EventInfo eventInfo) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
-        EditPersonController controller = new EditPersonController(dataHelper, person);
+        Stage stage = new Stage();
+        stage.initOwner(ownerStage);
+        EditEventController controller = new EditEventController(dataHelper, eventInfo, stage);
         loader.setController(controller);
-        Pane content = loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml").toURI().toURL()).openStream());
-        // передаем событие - изменены данные
+        Pane content = loader.load(requireNonNull(new File("src/main/layouts/EditEvent.fxml").toURI().toURL()).openStream());
         controller.addListener(() -> {
             if (listener != null) listener.personUpdated();
         });
-        List<String> allEvents = new ArrayList<>(dataHelper.getAllEventNames());
-        controller.setEventsList(allEvents);
-
-        Stage stage = new Stage();
-        stage.initOwner(ownerStage);
 
         Scene scene = new Scene(content);
         stage.setScene(scene);
         stage.setResizable(true);
         stage.setMinWidth(content.getPrefWidth());
         stage.setMinHeight(content.getPrefHeight());
-        stage.setTitle("Редактирование человека");
+        stage.setTitle("Редактирование мероприятия");
         stage.show();
     }
 
