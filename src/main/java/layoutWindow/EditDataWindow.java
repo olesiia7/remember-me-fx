@@ -17,11 +17,9 @@ public class EditDataWindow {
     public EditDataWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader();
+        EditDataController controller = new EditDataController(dataHelper, stage);
+        loader.setController(controller);
         TabPane content = loader.load(requireNonNull(new File("src/main/layouts/EditData.fxml").toURI().toURL().openStream()));
-        EditDataController controller = loader.getController();
-        controller.setStage(stage);
-        controller.setDataHelper(dataHelper);
-        controller.setDataFirstTime();
 
         stage.initOwner(ownerStage);
         Scene scene = new Scene(content);

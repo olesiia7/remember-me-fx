@@ -33,7 +33,7 @@ public class FileUtils {
         if (arrFiles != null) {
             List<String> redundantPic = Arrays.stream(arrFiles)
                     .map(File::getPath)
-                    .filter(pic -> !picPathToSave.contains(pic) && !pic.matches("[\\w\\W]*.db"))
+                    .filter(pic -> !picPathToSave.contains(pic) && pic.matches("[\\w\\W]*.png"))
                     .collect(Collectors.toList());
             deleteFiles(redundantPic);
         }
