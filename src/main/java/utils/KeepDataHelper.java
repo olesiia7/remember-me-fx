@@ -230,6 +230,22 @@ public class KeepDataHelper {
     }
 
     /**
+     * @param eventId event id, которого не должно быть у людей
+     * @return список людей, которые не состоят в данном мероприятии
+     */
+    public List<Person> getPeopleNotInEvent(int eventId) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        eventsAndPeopleTable.getPeopleNotHaveEventSQL(sqlBuilder, eventId);
+        List<Person> people = peopleTable.getPeopleById(sqlBuilder.toString());
+        for (Person person : people) {
+            // получаем изображения по каждому человеку
+            person.setPictures(picturesTable.getPersonPictures(person.getId()));
+            person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+        }
+        return people;
+    }
+
+    /**
      * Удаляет все возможные таблицы
      */
     private void dropAllTables() {
@@ -268,6 +284,16 @@ public class KeepDataHelper {
         picturesTable.setPersonPictures(person);
         Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person.getEvents());
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
+    }
+
+    /**
+     * Возвращает id существуюшего мероприятия или создает новое
+     *
+     * @param eventName название мероприятия
+     * @return id мероприятия
+     */
+    public int createEventAndGetId(String eventName) {
+        return eventsTable.addEventAndGetId(eventName);
     }
 
     /**

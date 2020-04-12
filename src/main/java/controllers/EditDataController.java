@@ -75,8 +75,7 @@ public class EditDataController {
     }
 
     @FXML
-    //ToDo: написать метод добавления нового Мероприятия
     public void createNewEvent() {
-//        peopleTab.addNewPerson();
+        eventsTab.createNewEvent();
     }
 }

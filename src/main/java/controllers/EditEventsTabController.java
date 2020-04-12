@@ -10,6 +10,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import layoutWindow.EditEventWindow;
@@ -20,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static utils.AlertUtils.showErrorAlert;
 
 public class EditEventsTabController {
     private final Stage stage;
@@ -127,17 +131,30 @@ public class EditEventsTabController {
     }
 
     /**
-     * Создает окно нового мероприятия. Если мероприятие сохранено, текущее окно обновляется (заполняется таблица)
+     * Создает окно нового мероприятия.
+     * Если мероприятие сохранено, текущее окно обновляется (заполняется таблица)
      */
-    public void addNewEvent() {
-        System.out.println("Создать новое мероприятие");
-//        try {
-//            CreateEventInfoWindow createEventInfoWindow = new CreateEventInfoWindow(dataHelper, stage);
-//            // обновляем таблицу при новом пользователе
-//            createEventInfoWindow.addListener(this::refreshFilters);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+    public void createNewEvent() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Создание нового мероприятия");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Введите название мероприятия:");
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(name -> {
+            if (dataHelper.getAllEventNames().contains(name)) {
+                showErrorAlert("Мероприятие с таким именем уже существует");
+                return;
+            }
+            int newEventId = dataHelper.createEventAndGetId(name);
+            EventInfo eventInfo = new EventInfo(newEventId, name, 0);
+            try {
+                EditEventWindow editEventWindow = new EditEventWindow(dataHelper, stage, eventInfo);
+                // обновляем таблицу при новом пользователе
+                editEventWindow.addListener(EditEventsTabController.this::refreshData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void refreshData() {

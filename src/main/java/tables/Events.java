@@ -48,7 +48,8 @@ public class Events implements Table {
     /**
      * Добавляет в таблицу мероприятия человека
      *
-     * @param newEvents@throws SQLException
+     * @param newEvents
+     * @throws SQLException
      */
     // ToDo: написать массовую вставку мероприятий
     public Set<Integer> addPersonEventsAndGetIds(Set<String> newEvents) throws SQLException {
@@ -69,6 +70,24 @@ public class Events implements Table {
             eventsIds.add(getEventId(event));
         }
         return eventsIds;
+    }
+
+    /**
+     * Возвращает id существуюшего мероприятия или создает новое
+     *
+     * @param eventName имя мероприятия
+     * @return id мероприятия
+     */
+    public Integer addEventAndGetId(String eventName) {
+        // проверка, есть ли уже существующий event с таким именем
+        Integer eventId = checkEventExistAndGetId(eventName);
+        if (eventId != null) {
+            return eventId;
+        }
+        String SQL = "INSERT INTO " + getTableName() + " (" + name + ") " +
+                "VALUES ('" + eventName + "');";
+        executeSQL(conn, SQL);
+        return getEventId(eventName);
     }
 
     /**
@@ -115,18 +134,24 @@ public class Events implements Table {
         return allEvents;
     }
 
-    private Integer checkEventExistAndGetId(String eventName) throws SQLException {
-        String SQL = "Select " + id + " from " + getTableName() + " where " + name + "=?;";
-        PreparedStatement ps = conn.prepareStatement(SQL);
-        ps.setString(1, eventName);
-        ResultSet resultSet = ps.executeQuery();
-        Integer eventId = null;
-        if (resultSet.next()) {
-            eventId = resultSet.getInt(id);
+    private Integer checkEventExistAndGetId(String eventName) {
+        String SQL = "Select " + id + " from " + getTableName() + " where " + name + "='" + eventName + "';";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(SQL);
+            Integer eventId = null;
+            if (resultSet.next()) {
+                eventId = resultSet.getInt(id);
+            }
+            statement.close();
+            resultSet.close();
+            return eventId;
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+            return null;
         }
-        ps.close();
-        resultSet.close();
-        return eventId;
     }
 
 
@@ -135,16 +160,22 @@ public class Events implements Table {
      * @return id только что созданного мероприятия
      * @throws SQLException sql exception
      */
-    private int getEventId(@NonNull String eventName) throws SQLException {
+    private Integer getEventId(@NonNull String eventName) {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
-                " WHERE " + name + "=?;";
-        PreparedStatement ps = conn.prepareStatement(SQL);
-        ps.setString(1, eventName);
-        ResultSet resultSet = ps.executeQuery();
-        int eventId = resultSet.getInt(id);
-        resultSet.close();
-        ps.close();
-        return eventId;
+                " WHERE " + name + "='" + eventName + "';";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(SQL);
+            int eventId = resultSet.getInt(id);
+            resultSet.close();
+            statement.close();
+            return eventId;
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

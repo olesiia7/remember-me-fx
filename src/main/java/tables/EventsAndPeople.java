@@ -168,6 +168,21 @@ public class EventsAndPeople implements Table {
         }
     }
 
+    /**
+     * Добавляет в sqlBuilder запрос, возвращающий список id людей, которые не состоят в данном мероприятии
+     *
+     * @param sqlBuilder sqlBuilder, в который дополнится запрос
+     * @param eventId    id мероприятия, в котором не должен быть человек
+     */
+    public void getPeopleNotHaveEventSQL(StringBuilder sqlBuilder, int eventId) {
+
+        sqlBuilder.append("SELECT DISTINCT ").append(getPersonIdField()).append(" from ").append(getTableName())
+                .append(" WHERE ").append(personIdField).append(" NOT in(")
+                .append("SELECT DISTINCT ").append(getPersonIdField()).append(" from ").append(getTableName())
+                .append(" WHERE ").append(eventIdField).append(" IN(").append(eventId).append("))");
+    }
+
+
     public static String getFieldNames() {
         return personIdField + appendWithDelimiter(eventIdField);
     }

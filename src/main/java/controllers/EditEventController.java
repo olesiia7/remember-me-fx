@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import entities.EventDeleteMode;
 import entities.EventInfo;
 import entities.Person;
-import javafx.beans.property.SimpleObjectProperty;
+import entities.PersonWithSelected;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,10 +26,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+import layoutWindow.AddEventParticipantsWindow;
 import listeners.EventsUpdatedListener;
 import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static entities.DefaultPeopleTable.fillCheckBoxColumn;
 import static entities.DefaultPeopleTable.fillDefaultFields;
 import static entities.EventDeleteMode.ALL;
 import static entities.EventDeleteMode.ONLY_CHOSEN_PARTICIPANTS;
@@ -100,17 +103,10 @@ public class EditEventController {
 
         // устанавливаем тип и значение которое должно хранится в колонке
         fillDefaultFields(picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn);
-        selectedColumn.setCellValueFactory(data -> {
-            PersonWithSelected curPerson = data.getValue();
-            CheckBox checkBox = new CheckBox();
-            checkBox.selectedProperty().setValue(curPerson.isSelected());
-            checkBox.selectedProperty().addListener((ov, old_val, new_val) -> peopleData.stream()
-                    .filter(person -> person.getId() == curPerson.getId())
-                    .forEach(person -> person.setSelected(new_val)));
-            return new SimpleObjectProperty<>(checkBox);
-        });
+        fillCheckBoxColumn(selectedColumn, peopleData);
         refreshData(true);
     }
+
 
     /**
      * Обновляет данные в таблице
@@ -124,7 +120,8 @@ public class EditEventController {
             peopleWithSelected = new ArrayList<>();
             for (Person person : people) {
                 // если не новый пользователь, то ставим прошлую отметку
-                Optional<PersonWithSelected> optional = peopleData.stream().filter(pers -> pers.getId() == person.getId())
+                Optional<PersonWithSelected> optional = peopleData.stream()
+                        .filter(pers -> pers.getId() == person.getId())
                         .findFirst();
                 boolean selected = false;
                 if (optional.isPresent()) {
@@ -134,11 +131,18 @@ public class EditEventController {
             }
             // обновляем кол-во участников мероприятия
             partCount.setText("" + peopleWithSelected.size());
+            notifyListeners();
         } else {
             peopleWithSelected = ImmutableList.copyOf(peopleData);
         }
         setDataToTable(peopleWithSelected);
         tablePeople.requestLayout();
+    }
+
+    private void notifyListeners() {
+        if (listener != null) {
+            listener.eventUpdated();
+        }
     }
 
     /**
@@ -197,9 +201,7 @@ public class EditEventController {
                     getSelectedPeople().stream().map(Person::getId).collect(Collectors.toList()),
                     peopleData.stream().map(Person::getId).collect(Collectors.toList()));
             refreshData(true);
-            if (listener != null) {
-                listener.eventUpdated();
-            }
+            notifyListeners();
             stage.close();
             // при удалении мероприятия закрыть окно редактирования этого мероприятия
             if (mode == ALL) {
@@ -274,9 +276,7 @@ public class EditEventController {
                 dataHelper.deleteEventsFromPeople(eventInfo.getId(), selectedPeopleIds);
             }
             refreshData(true);
-            if (listener != null) {
-                listener.eventUpdated();
-            }
+            notifyListeners();
             stage.close();
         });
         Button cancelButton = new Button("Отменить");
@@ -319,6 +319,10 @@ public class EditEventController {
     void saveEvent() {
         String newName = eventName.getText();
         if (!newName.equals(eventInfo.getName())) {
+            if (dataHelper.getAllEventNames().contains(newName)) {
+                showErrorAlert("Мероприятие с таким именем уже существует");
+                return;
+            }
             dataHelper.setEventName(eventInfo.getId(), newName);
             tablePeople.refresh();
             listener.eventUpdated();
@@ -341,24 +345,15 @@ public class EditEventController {
     public void addListener(EventsUpdatedListener evtListener) {
         this.listener = evtListener;
     }
+
+    @FXML
+    private void addParticipants() {
+        try {
+            AddEventParticipantsWindow addEventParticipantsWindow = new AddEventParticipantsWindow(dataHelper, ownStage, eventInfo);
+            addEventParticipantsWindow.addListener(() -> this.refreshData(true));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
-class PersonWithSelected extends Person {
-    private boolean isSelected;
-
-    public PersonWithSelected(boolean isSelected, Person person) {
-        super(person.getId(), person.getName(), person.getEvents(), person.getCompany(), person.getRole(), person.getDescription(),
-                person.getPictures(), person.getRemembered());
-        this.isSelected = isSelected;
-    }
-
-    public boolean isSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(boolean selected) {
-        isSelected = selected;
-    }
-
-
-}

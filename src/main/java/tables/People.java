@@ -127,6 +127,28 @@ public class People implements Table {
     }
 
     /**
+     * @param idSQL sql, в котором будут получены id
+     * @return список людей по выбранным id
+     */
+    public List<Person> getPeopleById(String idSQL) {
+        List<Person> people = new ArrayList<>();
+        StringBuilder SQLBuilder = new StringBuilder("select * from " + getTableName() +
+                " where " + id + " in (").append(idSQL).append(");");
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet peopleResultSet = statement.executeQuery(SQLBuilder.toString());
+            people.addAll(getPeopleFromResultSet(peopleResultSet));
+            statement.close();
+            peopleResultSet.close();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQLBuilder.toString());
+            e.printStackTrace();
+        }
+        return people;
+    }
+
+    /**
      * Возвращает Person из ResultSet
      *
      * @param rs ResultSet, из которого надо вытянуть данные
