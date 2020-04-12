@@ -147,7 +147,7 @@ public class EditPeopleTabController {
             chosenItems.addListener((ListChangeListener<String>) c -> {
                 ObservableList<String> eventsItems = eventsFilter.getCheckModel().getCheckedItems();
                 ObservableList<String> companiesItems = companiesFilter.getCheckModel().getCheckedItems();
-                setDataToTable(dataHelper.getPeopleByCriteria(eventsItems, companiesItems));
+                setDataToTable(dataHelper.getPeopleByCriteria(eventsItems, companiesItems, false));
             });
         }
     }
@@ -247,7 +247,7 @@ public class EditPeopleTabController {
             companiesFilter.getCheckModel().check(selectedItem);
         }
 
-        setDataToTable(dataHelper.getPeopleByCriteria(unmodifiedEventsList, unmodifiedCompaniesList));
+        setDataToTable(dataHelper.getPeopleByCriteria(unmodifiedEventsList, unmodifiedCompaniesList, false));
         filterPanel.requestLayout();
     }
 }

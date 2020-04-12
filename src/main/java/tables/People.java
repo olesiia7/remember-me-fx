@@ -204,6 +204,26 @@ public class People implements Table {
         resultSet.close();
     }
 
+    /**
+     * Помечает человека запомненным/нет
+     *
+     * @param personId     id человека
+     * @param isRemembered запомнен или нет
+     */
+    public void setPersonRemembered(int personId, boolean isRemembered) {
+        String SQL = "UPDATE " + getTableName() + " SET " + remembered + "=" + isRemembered +
+                " WHERE " + id + "=" + personId + ";";
+        executeSQL(conn, SQL);
+    }
+
+    /**
+     * Помечает всеъ людей незапомненными
+     */
+    public void setAllPeopleNotRemembered() {
+        String SQL = "UPDATE " + getTableName() + " SET " + remembered + "=false;";
+        executeSQL(conn, SQL);
+    }
+
     public String getFieldNamesWithoutIdAndRemembered() {
         return name +
                 appendWithDelimiter(company) +

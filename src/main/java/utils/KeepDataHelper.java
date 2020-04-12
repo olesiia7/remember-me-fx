@@ -80,6 +80,23 @@ public class KeepDataHelper {
         settingsTable.createTableIfNotExist();
     }
 
+    /**
+     * Помечает человека запомненным/нет
+     *
+     * @param personId     id человека
+     * @param isRemembered запомнен или нет
+     */
+    public void setPersonRemembered(int personId, boolean isRemembered) {
+        peopleTable.setPersonRemembered(personId, isRemembered);
+    }
+
+    /**
+     * Помечает всеъ людей незапомненными
+     */
+    public void setAllPeopleNotRemembered() {
+        peopleTable.setAllPeopleNotRemembered();
+    }
+
     public SettingsProfile getSettings() {
         return settingsTable.getAllSettings();
     }
@@ -186,11 +203,14 @@ public class KeepDataHelper {
     }
 
     /**
-     * @param events    список мероприятий, должно быть совпадение хотя бы по одному
-     * @param companies список мест работ, должно быть совпадение хотя бы по одному
+     * @param events           список мероприятий, должно быть совпадение хотя бы по одному
+     * @param companies        список мест работ, должно быть совпадение хотя бы по одному
+     * @param unRememberedOnly выбрать только не запомненных
      * @return список людей, кто имеет совпадения и по мероприятиям, и по компаниям
      */
-    public List<Person> getPeopleByCriteria(@NonNull List<String> events, @NonNull List<String> companies) {
+    public List<Person> getPeopleByCriteria(@NonNull List<String> events, @NonNull List<String> companies,
+                                            boolean unRememberedOnly)
+    {
         List<Person> people = new ArrayList<>();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select * from ").append(peopleTable.getTableName());
@@ -206,9 +226,18 @@ public class KeepDataHelper {
                 sqlBuilder.append(" and ");
             } else {
                 sqlBuilder.append(" where ");
+                whereExist = true;
             }
             sqlBuilder.append(People.company).append(" in(");
             sqlBuilder.append(companies.stream().map(company -> "'" + company + "'").collect(Collectors.joining(","))).append(")");
+        }
+        if (unRememberedOnly) {
+            if (whereExist) {
+                sqlBuilder.append(" and ");
+            } else {
+                sqlBuilder.append(" where ");
+            }
+            sqlBuilder.append(People.remembered).append("=false");
         }
         sqlBuilder.append(";");
         try {

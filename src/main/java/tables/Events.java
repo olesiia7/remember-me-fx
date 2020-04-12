@@ -48,8 +48,8 @@ public class Events implements Table {
     /**
      * Добавляет в таблицу мероприятия человека
      *
-     * @param newEvents
-     * @throws SQLException
+     * @param newEvents названия мероприятий, которые нужно добавить
+     * @throws SQLException sql exception
      */
     // ToDo: написать массовую вставку мероприятий
     public Set<Integer> addPersonEventsAndGetIds(Set<String> newEvents) throws SQLException {
@@ -158,7 +158,6 @@ public class Events implements Table {
     /**
      * @param eventName название мероприятия
      * @return id только что созданного мероприятия
-     * @throws SQLException sql exception
      */
     private Integer getEventId(@NonNull String eventName) {
         String SQL = "SELECT " + id + " FROM " + getTableName() +

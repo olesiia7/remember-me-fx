@@ -6,13 +6,9 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import utils.KeepDataHelper;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,11 +29,7 @@ public class WatchPeopleController extends DefaultPersonController {
     @Override
     @FXML
     void initialize() {
-        name.setEditable(false);
-        events.setEditable(false);
-        company.setEditable(false);
-        role.setEditable(false);
-        description.setEditable(false);
+        setAllFieldsDisabled();
 
         HBox hBox = new HBox();
         Button retryButton = new Button("Начать сначала");
@@ -74,9 +66,9 @@ public class WatchPeopleController extends DefaultPersonController {
 
     public void setNewPerson() {
         if (i >= people.size()) {
-          timer.cancel();
+            timer.cancel();
             System.out.println("опять");
-          return;
+            return;
         }
         Person person = people.get(i);
         // заполняем данными человека
@@ -87,17 +79,7 @@ public class WatchPeopleController extends DefaultPersonController {
         description.setText(person.getDescription());
         gridPane.setPrefHeight(gridPane.getPrefHeight() + 50);
         imageHBox.getChildren().clear();
-        for (String picture : person.getPictures()) {
-            try {
-                Image image = new Image(new FileInputStream(picture));
-                VBox imageLayout = getImageLayoutWithOutDelete(image);
-                imageHBox.setAlignment(Pos.CENTER);
-                imageLayout.setAlignment(Pos.CENTER);
-                imageHBox.getChildren().addAll(imageLayout);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+        fillPersonImages(person, false);
         gridPane.requestLayout();
         i++;
     }

@@ -1,19 +1,36 @@
+import controllers.ControlPeopleController;
+import entities.Person;
+import entities.ShowMode;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import layoutWindow.CreatePersonWindow;
 import layoutWindow.EditDataWindow;
 import layoutWindow.PreWatchDataWindow;
 import layoutWindow.SettingsWindow;
+import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
 
+import static entities.ShowMode.clearAllShowModeValues;
+import static java.util.Objects.requireNonNull;
+import static utils.AlertUtils.showErrorAlert;
 import static utils.FileUtils.deleteUnusedFiles;
 
 public class InitialFX extends Application {
@@ -65,6 +82,10 @@ public class InitialFX extends Application {
                 e.printStackTrace();
             }
         });
+        Button controlDataButton = new Button("Режим самопроверки");
+        controlDataButton.setOnAction(actionEvent -> {
+            createPreControlWindow(stage);
+        });
         Button settingsButton = new Button("Настройки");
         settingsButton.setOnAction(actionEvent -> {
             try {
@@ -73,10 +94,126 @@ public class InitialFX extends Application {
                 e.printStackTrace();
             }
         });
-        vBox.getChildren().addAll(addNewPersonButton, editDataButton, watchDataButton, settingsButton);
+        vBox.getChildren().addAll(addNewPersonButton, editDataButton, watchDataButton, controlDataButton, settingsButton);
         Scene scene = new Scene(vBox);
         stage.setTitle("Remember me");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void createPreControlWindow(Stage parentStage) {
+        Stage stage = new Stage();
+        stage.setTitle("Настройка режима проверки");
+        stage.initOwner(parentStage);
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(5));
+        vBox.setSpacing(5);
+
+        HBox hBox1 = new HBox();
+        hBox1.setSpacing(5);
+        hBox1.setAlignment(Pos.CENTER);
+        Label label = new Label("Проверка по полям: ");
+        ShowMode[] showModeValues = ShowMode.values();
+        ObservableList<Object> showModes = FXCollections.observableArrayList();
+        for (ShowMode value : showModeValues) {
+            showModes.add(value.getName());
+        }
+        CheckComboBox modeChoiceBox = new CheckComboBox(showModes);
+        modeChoiceBox.getCheckModel().check(ShowMode.NAME.getName());
+        clearAllShowModeValues();
+        modeChoiceBox.setPrefWidth(250);
+        hBox1.getChildren().addAll(label, modeChoiceBox);
+
+        HBox settingBox = new HBox();
+        settingBox.setAlignment(Pos.CENTER);
+        settingBox.setSpacing(5);
+        Label settingLabel = new Label("Время экспозиции правильного ответа");
+        TextField timeTextField = new TextField();
+        timeTextField.setPrefWidth(77);
+        int oldAnswerTimeMs = dataHelper.getAnswerTimeMs();
+        timeTextField.setText("" + oldAnswerTimeMs);
+        Pattern p = Pattern.compile("(\\d+)?");
+        timeTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!p.matcher(newValue).matches()) timeTextField.setText(oldValue);
+        });
+        Label msLabel = new Label("мс");
+        settingBox.getChildren().addAll(settingLabel, timeTextField, msLabel);
+
+        Label filterLabel = new Label("Фильтры (по умолчанию все):");
+
+        HBox hBox2 = new HBox();
+        hBox2.setSpacing(5);
+        Label label2 = new Label("Место работы:");
+        ObservableList<Object> companiesFilter = FXCollections.observableArrayList();
+        companiesFilter.addAll(dataHelper.getAllCompanies());
+        CheckComboBox companiesChoiceBox = new CheckComboBox(companiesFilter);
+        companiesChoiceBox.setPrefWidth(250);
+        hBox2.getChildren().addAll(label2, companiesChoiceBox);
+        Label label3 = new Label("Место работы:");
+        ObservableList<Object> eventsFilter = FXCollections.observableArrayList();
+        eventsFilter.addAll(dataHelper.getAllEventNames());
+        CheckComboBox eventsChoiceBox = new CheckComboBox(eventsFilter);
+        eventsChoiceBox.setPrefWidth(250);
+        hBox2.getChildren().addAll(label3, eventsChoiceBox);
+
+        CheckBox startAgain = new CheckBox("Начать сначала");
+        startAgain.setTooltip(new Tooltip("Если галочки нет, запомненные люди не будут показаны"));
+
+        HBox buttonBox = new HBox();
+        buttonBox.setSpacing(5);
+        Button saveButton = new Button("Готово!");
+        saveButton.setOnAction(action -> {
+            List<String> selectedModes = modeChoiceBox.getCheckModel().getCheckedItems();
+            if (selectedModes.isEmpty()) {
+                showErrorAlert("Вы не выбрали поля для проверки");
+                return;
+            }
+            // выставляем моды
+            for (String modeName : selectedModes) {
+                ShowMode mode = ShowMode.getModeByName(modeName);
+                mode.setEnabled(true);
+            }
+            List<String> eventsFilterValue = eventsChoiceBox.getCheckModel().getCheckedItems();
+            List<String> companiesFilterValue = companiesChoiceBox.getCheckModel().getCheckedItems();
+            List<Person> peopleToShow;
+            if (startAgain.isSelected()) {
+                // помечаем всех незапомненными
+                dataHelper.setAllPeopleNotRemembered();
+            }
+            peopleToShow = dataHelper.getPeopleByCriteria(eventsFilterValue, companiesFilterValue, true);
+            if (peopleToShow.isEmpty()) {
+                showErrorAlert("По выбранным критериям нет ни одного человека");
+                return;
+            }
+            int newAnswerTimeMs = Integer.parseInt(timeTextField.getText());
+            // если значение изменилось, сохраняем его в настройки
+            if (newAnswerTimeMs != oldAnswerTimeMs) {
+                dataHelper.setAnswerTimeMsSetting(newAnswerTimeMs);
+            }
+            stage.close();
+            startControl(peopleToShow, newAnswerTimeMs);
+        });
+        Button cancelButton = new Button("Отменить");
+        cancelButton.setOnAction(action -> stage.close());
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.getChildren().addAll(saveButton, cancelButton);
+
+        vBox.getChildren().addAll(hBox1, settingBox, filterLabel, hBox2, startAgain, buttonBox);
+        vBox.setAlignment(Pos.CENTER);
+        Scene scene = new Scene(vBox);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void startControl(List<Person> peopleToShow, int newAnswerTimeMs) {
+        FXMLLoader loader = new FXMLLoader();
+        Stage stage = new Stage();
+        ControlPeopleController controller = new ControlPeopleController(dataHelper, peopleToShow, newAnswerTimeMs, stage);
+        loader.setController(controller);
+        try {
+            loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml").toURI().toURL()).openStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

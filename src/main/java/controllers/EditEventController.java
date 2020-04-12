@@ -116,7 +116,7 @@ public class EditEventController {
     private void refreshData(boolean requestPeople) {
         List<PersonWithSelected> peopleWithSelected;
         if (requestPeople) {
-            List<Person> people = dataHelper.getPeopleByCriteria(singletonList(eventInfo.getName()), EMPTY_LIST);
+            List<Person> people = dataHelper.getPeopleByCriteria(singletonList(eventInfo.getName()), EMPTY_LIST, false);
             peopleWithSelected = new ArrayList<>();
             for (Person person : people) {
                 // если не новый пользователь, то ставим прошлую отметку

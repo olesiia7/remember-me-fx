@@ -69,7 +69,7 @@ public class PreWatchPeopleController {
         // собрать фильтры и по ним инфу
         ObservableList<String> companiesItems = companiesFilter.getCheckModel().getCheckedItems();
         ObservableList<String> eventsItems = eventsFilter.getCheckModel().getCheckedItems();
-        List<Person> people = new ArrayList<>(dataHelper.getPeopleByCriteria(eventsItems, companiesItems));
+        List<Person> people = new ArrayList<>(dataHelper.getPeopleByCriteria(eventsItems, companiesItems, false));
         if (people.isEmpty()) {
             showErrorAlert("Под выбранный фильтр не подходит ни один человек");
         } else {

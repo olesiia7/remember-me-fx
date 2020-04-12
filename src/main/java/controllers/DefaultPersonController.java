@@ -1,7 +1,9 @@
 package controllers;
 
+import entities.Person;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -16,6 +18,8 @@ import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 
@@ -108,5 +112,32 @@ public abstract class DefaultPersonController {
      */
     Stage getStage() {
         return (Stage) gridPane.getScene().getWindow();
+    }
+
+    public void setAllFieldsDisabled() {
+        name.setEditable(false);
+        events.setEditable(false);
+        company.setEditable(false);
+        role.setEditable(false);
+        description.setEditable(false);
+    }
+
+    public void fillPersonImages(Person person, boolean withDeleteButton) {
+        for (String picture : person.getPictures()) {
+            try {
+                Image image = new Image(new FileInputStream(picture));
+                VBox imageLayout;
+                if (withDeleteButton) {
+                    imageLayout = getImageLayout(image);
+                } else {
+                    imageLayout = getImageLayoutWithOutDelete(image);
+                }
+                imageHBox.setAlignment(Pos.CENTER);
+                imageLayout.setAlignment(Pos.CENTER);
+                imageHBox.getChildren().addAll(imageLayout);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

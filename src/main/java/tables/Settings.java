@@ -92,7 +92,7 @@ public class Settings implements Table {
      */
     public void setAnswerTimeMs(int answerTimeMsValue) {
         String SQL = "UPDATE " + getTableName() + " SET " +
-                answerTimeMsValue + "='" + answerTimeMsValue + "' " + " WHERE " + id + "=0;";
+                answerTimeMs + "='" + answerTimeMsValue + "' " + " WHERE " + id + "=0;";
         executeSQL(conn, SQL);
     }
 
