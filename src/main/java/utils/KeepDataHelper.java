@@ -403,7 +403,7 @@ public class KeepDataHelper {
     /**
      * @param ids id людей, картинки которых надо удалить с компьютера
      */
-    private void deletePeoplePictures(@NonNull List<Integer> ids) {
+    public void deletePeoplePictures(@NonNull List<Integer> ids) {
         List<String> uninstallImages = new ArrayList<>();
         for (int id : ids) {
             uninstallImages.addAll(picturesTable.getPersonPictures(id));

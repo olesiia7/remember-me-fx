@@ -1,7 +1,7 @@
 package controllers;
 
 import entities.Person;
-import entities.ShowMode;
+import entities.ShowModeEnum;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -86,22 +86,22 @@ public class ControlPeopleController extends DefaultPersonController {
     private void showTrueAnswer(boolean remembered) {
         setButtonDisabled(true);
         Person person = people.get(indexPerson - 1);
-        if (!ShowMode.NAME.isEnabled()) {
+        if (!ShowModeEnum.NAME.isEnabled()) {
             name.setText(person.getName());
         }
-        if (!ShowMode.EVENTS.isEnabled()) {
+        if (!ShowModeEnum.EVENTS.isEnabled()) {
             events.setText(String.join(",", person.getEvents()));
         }
-        if (!ShowMode.COMPANY.isEnabled()) {
+        if (!ShowModeEnum.COMPANY.isEnabled()) {
             company.setText(person.getCompany());
         }
-        if (!ShowMode.ROLE.isEnabled()) {
+        if (!ShowModeEnum.ROLE.isEnabled()) {
             role.setText(person.getRole());
         }
-        if (!ShowMode.DESCRIPTION.isEnabled()) {
+        if (!ShowModeEnum.DESCRIPTION.isEnabled()) {
             description.setText(person.getDescription());
         }
-        if (!ShowMode.PICTURES.isEnabled()) {
+        if (!ShowModeEnum.PICTURES.isEnabled()) {
             fillPersonImages(person, false);
         }
         dataHelper.setPersonRemembered(person.getId(), remembered);
@@ -125,8 +125,6 @@ public class ControlPeopleController extends DefaultPersonController {
     private void setNextPerson() {
         if (indexPerson == people.size()) {
             indexPerson++;
-            showInformationAlert("Поздравляем! Режим самопроверки окончен!",
-                    "Поздравляем, Вы просмотрели всех людей, подходящих под выбранные фильтры!");
             rememberedButton.setDisable(true);
             markUnrememberedButton.setDisable(true);
             mistakeButton.setDisable(false);
@@ -136,22 +134,22 @@ public class ControlPeopleController extends DefaultPersonController {
 
         Person person = people.get(indexPerson++);
         stage.setTitle("Режим проверки: " + indexPerson + "/" + people.size());
-        if (ShowMode.NAME.isEnabled()) {
+        if (ShowModeEnum.NAME.isEnabled()) {
             name.setText(person.getName());
         }
-        if (ShowMode.EVENTS.isEnabled()) {
+        if (ShowModeEnum.EVENTS.isEnabled()) {
             events.setText(String.join(",", person.getEvents()));
         }
-        if (ShowMode.COMPANY.isEnabled()) {
+        if (ShowModeEnum.COMPANY.isEnabled()) {
             company.setText(person.getCompany());
         }
-        if (ShowMode.ROLE.isEnabled()) {
+        if (ShowModeEnum.ROLE.isEnabled()) {
             role.setText(person.getRole());
         }
-        if (ShowMode.DESCRIPTION.isEnabled()) {
+        if (ShowModeEnum.DESCRIPTION.isEnabled()) {
             description.setText(person.getDescription());
         }
-        if (ShowMode.PICTURES.isEnabled()) {
+        if (ShowModeEnum.PICTURES.isEnabled()) {
             fillPersonImages(person, false);
         }
     }

@@ -12,12 +12,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -36,7 +38,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
+import static utils.AlertUtils.showErrorAlert;
 import static utils.FileUtils.getPictureFromClipboard;
 
 public abstract class DefaultNewOrEditPersonController extends DefaultPersonController {
@@ -45,6 +49,9 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     public Button setImageButton;
     public Button cancelButton;
     public Button saveButton;
+
+    private static final String greenColor = Paint.valueOf(Integer.toHexString(Color.GREEN.hashCode())).toString().substring(2);
+    private static final String greyColor = Paint.valueOf(Integer.toHexString(Color.GREY.hashCode())).toString().substring(2);
 
     public DefaultNewOrEditPersonController(KeepDataHelper dataHelper) {
         super(dataHelper);
@@ -79,15 +86,37 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     }
 
     /**
-     * Собирает информацию из полей
+     * Собирает информацию из полей.
+     * Если изображения были изменены, то удаляет старые, сохраняет новые
+     * (или просто сохраняет новые, если человек создается).
+     * Если изображения не были сохранены, то оставляет предыдущие.
      *
-     * @return {@link Person}, в котором собрана информация из формы
+     * @param person человек (если создается новый, то null)
+     * @return {@link Person}, в котором собрана информация из формы (без id)
      */
-    Person createPersonFromFields() {
-        List<String> imgPaths = saveImagesToComputer();
+    Person createPersonFromFields(Person person) {
+        List<String> imgPaths;
+        if (person == null) {
+            imgPaths = saveImagesToComputer();
+        } else {
+            if (picturesChanged) {
+                // удалить старые фото
+                dataHelper.deletePeoplePictures(singletonList(person.getId()));
+                imgPaths = saveImagesToComputer();
+            } else {
+                imgPaths = person.getPictures();
+            }
+        }
         Set<String> eventsSet = new HashSet<>(Arrays.asList((events.getText().trim().split(","))));
         return new Person(name.getText().trim(), eventsSet,
                 company.getText().trim(), role.getText().trim(), description.getText().trim(), imgPaths);
+    }
+
+    /**
+     * @return см. createPersonFromFields(Person person)
+     */
+    Person createPersonFromFields() {
+        return createPersonFromFields(null);
     }
 
     public void setEventsList(List<String> allEvents) {
@@ -116,8 +145,9 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
             Image image = SwingFXUtils.toFXImage(getPictureFromClipboard(), null);
             VBox imageLayout = getImageLayout(image);
             imageHBox.getChildren().addAll(imageLayout);
+            picturesChanged = true;
         } catch (UnsupportedFlavorException | IOException e) {
-            System.out.println("вы выбрали не картинку!");
+            showErrorAlert("Вы выбрали не картинку!");
         }
     }
 
@@ -213,5 +243,21 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
         textFilter.setFill(Color.ORANGE);
         textFilter.setFont(Font.font("Helvetica", FontWeight.BOLD, 12));
         return new TextFlow(textBefore, textFilter, textAfter);
+    }
+
+    /**
+     * Перекрашивает цвет рамки в зависимости от изменений
+     *
+     * @param field     поле, рамку которого нужно перекрасить
+     * @param isChanged изменился ли (если да, то рамка станет зеленой, если нет - серой)
+     */
+    public static void recolorFieldBorder(TextInputControl field, boolean isChanged) {
+        String color;
+        if (isChanged) {
+            color = greenColor;
+        } else {
+            color = greyColor;
+        }
+        field.setStyle("-fx-border-color: #" + color);
     }
 }

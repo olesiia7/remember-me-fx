@@ -37,6 +37,8 @@ public abstract class DefaultPersonController {
     public TextArea description;
     public HBox imageHBox;
 
+    public boolean picturesChanged = false;
+
     public DefaultPersonController(KeepDataHelper dataHelper) {
         this.dataHelper = dataHelper;
     }
@@ -79,7 +81,7 @@ public abstract class DefaultPersonController {
             Button source = (Button) actionEvent.getSource();
             VBox parent = (VBox) source.getParent();
             imageHBox.getChildren().remove(parent);
-            System.out.println("Удалить " + parent);
+            picturesChanged = true;
         });
         double realWidth = imageView.boundsInLocalProperty().getValue().getWidth();
         deleteImageButton.setMaxWidth(realWidth);

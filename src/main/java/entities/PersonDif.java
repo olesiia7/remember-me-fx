@@ -49,11 +49,24 @@ public class PersonDif {
     }
 
     /**
+     * @param personDif изменения человека
+     * @return true, если изменения не пустые и false в противном случае
+     */
+    public static boolean isPersonChanged(PersonDif personDif) {
+        return personDif.isNameChanged()
+                || personDif.isEventsChanged()
+                || personDif.isCompanyChanged()
+                || personDif.isRoleChanged()
+                || personDif.isDescriptionChanged()
+                || personDif.isPicturesChanged();
+    }
+
+    /**
      * @param collection1 первая коллекция
      * @param collection2 вторая коллекция
      * @return true, если коллекции одинаковые, независимо от порядка элементов
      */
-    private static boolean isCollectionSameWithoutOrder(Collection<String> collection1, Collection<String> collection2) {
+    public static boolean isCollectionSameWithoutOrder(Collection<String> collection1, Collection<String> collection2) {
         if (!collection1.containsAll(collection2)) {
             return false;
         }
