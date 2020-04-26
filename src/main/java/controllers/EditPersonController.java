@@ -15,6 +15,7 @@ import java.util.Set;
 import static entities.PersonDif.createPersonDif;
 import static entities.PersonDif.isCollectionSameWithoutOrder;
 import static entities.PersonDif.isPersonChanged;
+import static utils.AlertUtils.showErrorAlert;
 import static utils.AlertUtils.showInformationAlert;
 
 public class EditPersonController extends DefaultNewOrEditPersonController {
@@ -71,7 +72,19 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
     @Override
     public void save() {
         Person updatedPerson = createPersonFromFields(person);
+        if (updatedPerson.getName().isEmpty()) {
+            showErrorAlert("ФИО не может быть пустым");
+            return;
+        }
         PersonDif personDif = createPersonDif(person, updatedPerson);
+        // проверка - чтобы не было переименования на существующего пользователя с таким же ФИО
+        if (personDif.isNameChanged()) {
+            boolean personExist = dataHelper.isPersonWithNameExist(personDif.getName());
+            if (personExist) {
+                showErrorAlert("Пользователь с таким ФИО уже существует");
+                return;
+            }
+        }
         if (isPersonChanged(personDif)) {
             try {
                 dataHelper.updatePerson(personDif);

@@ -65,6 +65,10 @@ public class KeepDataHelper {
         return allPeople;
     }
 
+    public boolean isPersonWithNameExist(String name) {
+        return peopleTable.isPersonWithNameExist(name);
+    }
+
     /**
      * Создает таблицы, если они не существуют
      *

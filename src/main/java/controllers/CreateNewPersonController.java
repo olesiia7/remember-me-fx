@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
+import static utils.AlertUtils.showErrorAlert;
+
 public class CreateNewPersonController extends DefaultNewOrEditPersonController {
     public NewPersonListener listener;
 
@@ -31,6 +33,16 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
      */
     @Override
     public void save() {
+        String personName = name.getText();
+        if (personName.isEmpty()) {
+            showErrorAlert("ФИО не может быть пустым");
+            return;
+        }
+        boolean personExist = dataHelper.isPersonWithNameExist(personName);
+        if (personExist) {
+            showErrorAlert("Пользователь с таким ФИО уже существует");
+            return;
+        }
         Person person = createPersonFromFields();
         try {
             dataHelper.savePerson(person);

@@ -113,6 +113,27 @@ public class People implements Table {
         return people;
     }
 
+    /**
+     * Ищет в таблице человека с таким же ФИО
+     *
+     * @param personName имя искомого человека
+     * @return true, если уже существует
+     */
+    public boolean isPersonWithNameExist(String personName) {
+        String SQL = "Select * from " + getTableName() +
+                " where " + name + " = " + getFieldWithQuote(personName) + ";";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet personResultSet = statement.executeQuery(SQL);
+            return personResultSet.next();
+        } catch (SQLException e) {
+            System.out.println("Ошибка при исполнении SQL:");
+            System.out.println(SQL);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public List<Person> getPeopleById(@NonNull Set<Integer> peopleId) {
         List<Person> people = new ArrayList<>();
         if (!peopleId.isEmpty()) {
