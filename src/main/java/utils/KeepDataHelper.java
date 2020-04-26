@@ -1,6 +1,7 @@
 package utils;
 
 import entities.Person;
+import entities.PersonDif;
 import entities.SettingsProfile;
 import lombok.NonNull;
 import tables.Events;
@@ -310,7 +311,7 @@ public class KeepDataHelper {
         // сохранение в таблицу человека
         peopleTable.savePersonAndGetId(person);
         // сохранение в таблицу картинок человека
-        picturesTable.setPersonPictures(person);
+        picturesTable.setPersonPictures(person.getId(), person.getPictures());
         Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person.getEvents());
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
     }
@@ -338,30 +339,41 @@ public class KeepDataHelper {
     /**
      * Перезаписывает данные пользователя
      *
-     * @param person данные, которые необходимо сохранить
+     * @param personDif изменения человека
      * @throws SQLException
      */
-    public void updatePerson(@NonNull Person person) throws SQLException {
+    public void updatePerson(@NonNull PersonDif personDif) throws SQLException {
         // обновление данных человека
-        peopleTable.updatePerson(person);
+        if (personDif.isNameChanged()
+                || personDif.isCompanyChanged()
+                || personDif.isRoleChanged()
+                || personDif.isDescriptionChanged())
+        {
+            peopleTable.updatePerson(personDif);
+        }
         // обновление картинок
-        int personId = person.getId();
-        deletePeoplePictures(singletonList(personId));
-        picturesTable.updatePersonPictures(person);
+        if (personDif.isPicturesChanged()) {
+            int personId = personDif.getId();
+            deletePeoplePictures(singletonList(personId));
+            picturesTable.updatePersonPictures(personId, personDif.getPictures());
+        }
         // обновление мероприятий
-        Set<String> existPersonEvents = eventsAndPeopleTable.getPersonEvents(personId);
-        Set<String> actualEvents = person.getEvents();
-        // удаление ненужных мероприятий
-        Set<String> redundantEvents = existPersonEvents.stream()
-                .filter(event -> !actualEvents.contains(event))
-                .collect(Collectors.toSet());
-        eventsAndPeopleTable.deletePersonEvents(redundantEvents, personId);
-        // добавление новых мероприятий
-        Set<String> newEvents = actualEvents.stream()
-                .filter(event -> !existPersonEvents.contains(event))
-                .collect(Collectors.toSet());
-        Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(newEvents);
-        eventsAndPeopleTable.addPersonEvents(personId, eventIds);
+        if (personDif.isEventsChanged()) {
+            int personId = personDif.getId();
+            Set<String> existPersonEvents = eventsAndPeopleTable.getPersonEvents(personId);
+            Set<String> actualEvents = personDif.getEvents();
+            // удаление ненужных мероприятий
+            Set<String> redundantEvents = existPersonEvents.stream()
+                    .filter(event -> !actualEvents.contains(event))
+                    .collect(Collectors.toSet());
+            eventsAndPeopleTable.deletePersonEvents(redundantEvents, personId);
+            // добавление новых мероприятий
+            Set<String> newEvents = actualEvents.stream()
+                    .filter(event -> !existPersonEvents.contains(event))
+                    .collect(Collectors.toSet());
+            Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(newEvents);
+            eventsAndPeopleTable.addPersonEvents(personId, eventIds);
+        }
     }
 
     public List<String> getAllPictures() {

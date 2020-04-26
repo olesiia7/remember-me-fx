@@ -129,6 +129,10 @@ public class Person {
         this.remembered = remembered;
     }
 
+    public Person clone() {
+        return new Person(id, name, events, company, role, description, pictures, remembered);
+    }
+
     @Override
     public String toString() {
         return "Person{" +

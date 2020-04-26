@@ -1,7 +1,5 @@
 package tables;
 
-import entities.Person;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,35 +43,36 @@ public class Pictures implements Table {
     /**
      * Добавляет в таблицу картинки человека
      *
-     * @param person человек с выставленным id
-     * @throws SQLException sql exception
+     * @param personId id человека
+     * @param pictures список картинок
      */
-    // ToDo: написать массовую вставку изображений
-    public void setPersonPictures(Person person) throws SQLException {
-        List<String> pictures = person.getPictures();
+    public void setPersonPictures(int personId, List<String> pictures) {
         if (pictures == null || pictures.isEmpty()) {
             return;
         }
-        String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutId() + ") " +
-                "VALUES (?, ?);";
+        StringBuilder SQL = new StringBuilder()
+                .append("INSERT INTO ").append(getTableName())
+                .append(" (").append(getFieldNamesWithoutId()).append(") ")
+                .append("VALUES ");
+        boolean haveElements = false;
         for (String picture : pictures) {
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            ps.setString(1, picture);
-            ps.setInt(2, person.getId());
-            ps.execute();
-            ps.close();
+            if (haveElements) SQL.append(", ");
+            SQL.append("(").append(getFieldWithQuote(picture)).append(",")
+                    .append(personId).append(")");
+            haveElements = true;
         }
+        executeSQL(conn, SQL.toString());
     }
 
     /**
      * Удаляет старые и добавляет новые записи о изображениях пользователя
      *
-     * @param person человек с выставленным id
-     * @throws SQLException sql exception
+     * @param personId id человека
+     * @param pictures список картинок
      */
-    public void updatePersonPictures(Person person) throws SQLException {
-        deletePersonPictures(person.getId());
-        setPersonPictures(person);
+    public void updatePersonPictures(int personId, List<String> pictures) {
+        deletePersonPictures(personId);
+        setPersonPictures(personId, pictures);
     }
 
     /**

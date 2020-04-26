@@ -1,6 +1,7 @@
 import controllers.ControlPeopleController;
+import entities.EventInfo;
 import entities.Person;
-import entities.ShowMode;
+import entities.ShowModeEnum;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -23,12 +25,13 @@ import layoutWindow.SettingsWindow;
 import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static entities.ShowMode.clearAllShowModeValues;
+import static entities.ShowModeEnum.clearAllShowModeValues;
 import static java.util.Objects.requireNonNull;
 import static utils.AlertUtils.showErrorAlert;
 import static utils.FileUtils.deleteUnusedFiles;
@@ -113,13 +116,13 @@ public class InitialFX extends Application {
         hBox1.setSpacing(5);
         hBox1.setAlignment(Pos.CENTER);
         Label label = new Label("Проверка по полям: ");
-        ShowMode[] showModeValues = ShowMode.values();
+        ShowModeEnum[] showModeValues = ShowModeEnum.values();
         ObservableList<Object> showModes = FXCollections.observableArrayList();
-        for (ShowMode value : showModeValues) {
+        for (ShowModeEnum value : showModeValues) {
             showModes.add(value.getName());
         }
         CheckComboBox modeChoiceBox = new CheckComboBox(showModes);
-        modeChoiceBox.getCheckModel().check(ShowMode.NAME.getName());
+        modeChoiceBox.getCheckModel().check(ShowModeEnum.NAME.getName());
         clearAllShowModeValues();
         modeChoiceBox.setPrefWidth(250);
         hBox1.getChildren().addAll(label, modeChoiceBox);
@@ -170,7 +173,7 @@ public class InitialFX extends Application {
             }
             // выставляем моды
             for (String modeName : selectedModes) {
-                ShowMode mode = ShowMode.getModeByName(modeName);
+                ShowModeEnum mode = ShowModeEnum.getModeByName(modeName);
                 mode.setEnabled(true);
             }
             List<String> eventsFilterValue = eventsChoiceBox.getCheckModel().getCheckedItems();

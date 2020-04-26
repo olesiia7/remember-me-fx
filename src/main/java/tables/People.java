@@ -1,6 +1,7 @@
 package tables;
 
 import entities.Person;
+import entities.PersonDif;
 import lombok.NonNull;
 
 import java.sql.Connection;
@@ -64,21 +65,32 @@ public class People implements Table {
     /**
      * Перезаписывает данные пользователя
      *
-     * @param person человек, которого нужно сохранить
+     * @param personDif изменения человека, которые нужно сохранить
      */
-    // ToDo: сделать перезапись только измененных данных
-    public void updatePerson(Person person) {
-        String SQL = "UPDATE " + getTableName() + " SET " +
-                name + " = " + getFieldWithQuote(person.getName()) + ", " +
-                company + " = " + getFieldWithQuote(person.getCompany()) + ", " +
-                role + " = " + getFieldWithQuote(person.getRole()) + ", " +
-                description + " = " + getFieldWithQuote(person.getDescription()) +
-                " WHERE " + id + " = " + person.getId();
-        executeSQL(conn, SQL);
-    }
-
-    private String getFieldWithQuote(String s) {
-        return "'" + s + "'";
+    public void updatePerson(PersonDif personDif) {
+        StringBuilder SQL = new StringBuilder();
+        SQL.append("UPDATE ").append(getTableName()).append(" SET ");
+        boolean haveParameter = false;
+        if (personDif.isNameChanged()) {
+            SQL.append(name).append(" = ").append(getFieldWithQuote(personDif.getName()));
+            haveParameter = true;
+        }
+        if (personDif.isCompanyChanged()) {
+            if (haveParameter) SQL.append(",");
+            SQL.append(company).append(" = ").append(getFieldWithQuote(personDif.getCompany()));
+            haveParameter = true;
+        }
+        if (personDif.isRoleChanged()) {
+            if (haveParameter) SQL.append(",");
+            SQL.append(role).append(" = ").append(getFieldWithQuote(personDif.getRole()));
+            haveParameter = true;
+        }
+        if (personDif.isDescriptionChanged()) {
+            if (haveParameter) SQL.append(",");
+            SQL.append(description).append(" = ").append(getFieldWithQuote(personDif.getDescription()));
+        }
+        SQL.append(" WHERE ").append(id).append(" = ").append(personDif.getId());
+        executeSQL(conn, SQL.toString());
     }
 
     /**

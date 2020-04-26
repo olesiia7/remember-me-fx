@@ -1,4 +1,5 @@
 import entities.Person;
+import entities.PersonDif;
 import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static entities.PersonDif.createPersonDif;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -112,11 +114,12 @@ public class DbTests {
         person = savedPeople.get(0);
         assertEquals(person.getName(), "test1");
 
-        Person expectedUpdatedPerson = person;
+        Person expectedUpdatedPerson = person.clone();
         expectedUpdatedPerson.setName("test3");
-        person.setEvents(new HashSet<>(Arrays.asList("Мероприятие2", "Мероприятие3")));
-        person.setPictures(Arrays.asList("src/test/resources/testImage3.png", "src/test/resources/testImage4.png"));
-        dataHelper.updatePerson(expectedUpdatedPerson);
+        expectedUpdatedPerson.setEvents(new HashSet<>(Arrays.asList("Мероприятие2", "Мероприятие3")));
+        expectedUpdatedPerson.setPictures(Arrays.asList("src/test/resources/testImage3.png", "src/test/resources/testImage4.png"));
+        PersonDif personDif = createPersonDif(person, expectedUpdatedPerson);
+        dataHelper.updatePerson(personDif);
 
         savedPeople = dataHelper.getSavedPeople();
         assertEquals(2, savedPeople.size());

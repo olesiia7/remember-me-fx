@@ -42,4 +42,8 @@ public interface Table {
             e.printStackTrace();
         }
     }
+
+    default String getFieldWithQuote(String s) {
+        return "'" + s + "'";
+    }
 }

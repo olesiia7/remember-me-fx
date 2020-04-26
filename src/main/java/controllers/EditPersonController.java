@@ -1,11 +1,14 @@
 package controllers;
 
 import entities.Person;
+import entities.PersonDif;
 import javafx.fxml.FXML;
 import listeners.PersonUpdatedListener;
 import utils.KeepDataHelper;
 
 import java.sql.SQLException;
+
+import static entities.PersonDif.createPersonDif;
 
 public class EditPersonController extends DefaultNewOrEditPersonController {
     private final Person person;
@@ -35,9 +38,9 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
     @Override
     public void save() {
         Person updatedPerson = createPersonFromFields();
-        updatedPerson.setId(person.getId());
+        PersonDif personDif = createPersonDif(person, updatedPerson);
         try {
-            dataHelper.updatePerson(updatedPerson);
+            dataHelper.updatePerson(personDif);
             // уведомить, что данные пользователя обновились
             if (listener != null) {
                 listener.personUpdated();

@@ -1,6 +1,6 @@
 package entities;
 
-public enum ShowMode {
+public enum ShowModeEnum {
     NAME("ФИО") {
         private boolean enabled = false;
 
@@ -82,7 +82,7 @@ public enum ShowMode {
 
     private final String name;
 
-    ShowMode(String name) {
+    ShowModeEnum(String name) {
         this.name = name;
     }
 
@@ -94,8 +94,8 @@ public enum ShowMode {
 
     public abstract void setEnabled(boolean isEnabled);
 
-    public static ShowMode getModeByName(String name) {
-        for (ShowMode mode : ShowMode.values()) {
+    public static ShowModeEnum getModeByName(String name) {
+        for (ShowModeEnum mode : ShowModeEnum.values()) {
             if (mode.getName().equals(name)) {
                 return mode;
             }
@@ -104,7 +104,7 @@ public enum ShowMode {
     }
 
     public static void clearAllShowModeValues() {
-        for (ShowMode mode : ShowMode.values()) {
+        for (ShowModeEnum mode : ShowModeEnum.values()) {
             mode.setEnabled(false);
         }
     }
