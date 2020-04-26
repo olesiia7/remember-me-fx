@@ -395,7 +395,7 @@ public class KeepDataHelper {
     }
 
     public List<String> getAllPictures() {
-        return picturesTable.getAllPictures();
+        return picturesTable.getAllPictures(settingsTable.getDataPath());
     }
 
     /**

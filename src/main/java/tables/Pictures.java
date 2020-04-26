@@ -108,7 +108,7 @@ public class Pictures implements Table {
     /**
      * @return список всех картинок пользователей
      */
-    public List<String> getAllPictures() {
+    public List<String> getAllPictures(String dataPath) {
         List<String> pictures = new ArrayList<>();
         String SQL = "select * from " + getTableName() + ";";
         try {
@@ -124,7 +124,9 @@ public class Pictures implements Table {
             System.out.println(SQL);
             e.printStackTrace();
         }
-        return pictures;
+        return pictures.stream()
+                .map(pictureName -> dataPath + "\\" + pictureName)
+                .collect(Collectors.toList());
     }
 
     public static String getFieldNamesWithoutId() {

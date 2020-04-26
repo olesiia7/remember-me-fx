@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import static java.awt.Toolkit.getDefaultToolkit;
 import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 
 /**
@@ -46,7 +47,7 @@ public abstract class DefaultPersonController {
 
     @FXML
     void initialize() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension screenSize = getDefaultToolkit().getScreenSize();
         gridPane.setMaxSize(screenSize.getWidth(), screenSize.getHeight());
     }
 
@@ -68,7 +69,7 @@ public abstract class DefaultPersonController {
             event.consume();
             ImageView imageView1 = (ImageView) event.getSource();
             Image image1 = imageView1.getImage();
-            ImageView fullScreenImageView = new ImageView(image1);
+            ImageView fullScreenImageView = createFullSizeImageView(image1);
             StackPane pane = new StackPane();
             pane.getChildren().add(fullScreenImageView);
             Scene scene = new Scene(pane);
@@ -104,6 +105,22 @@ public abstract class DefaultPersonController {
         ImageView imageView = new ImageView();
         imageView.setFitHeight(300);
         imageView.setFitWidth(300);
+        imageView.setImage(image);
+        imageView.setPickOnBounds(true);
+        imageView.setPreserveRatio(true);
+        return imageView;
+    }
+
+    private ImageView createFullSizeImageView(Image image) {
+        ImageView imageView = new ImageView();
+        int screenHeight = getDefaultToolkit().getScreenSize().height - 80;
+        int screenWidth = getDefaultToolkit().getScreenSize().width;
+        if (image.getHeight() > screenHeight) {
+            imageView.setFitHeight(screenHeight);
+        }
+        if (image.getHeight() > screenWidth) {
+            imageView.setFitWidth(screenWidth);
+        }
         imageView.setImage(image);
         imageView.setPickOnBounds(true);
         imageView.setPreserveRatio(true);
