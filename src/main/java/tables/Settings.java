@@ -14,21 +14,10 @@ public class Settings implements Table {
     public static final String dataPath = "dataPath";
     public static final String answerTimeMs = "answerTimeMs";
     public static final String watchTimeMs = "watchTimeMs";
+    public static final String dataShowInControl = "dataShowInControl";
 
     public Settings(Connection conn) {
         this.conn = conn;
-    }
-
-    public String getDataPathField() {
-        return getTableName() + "." + dataPath;
-    }
-
-    public String getAnswerTimeMsField() {
-        return getTableName() + "." + answerTimeMs;
-    }
-
-    public String getWatchTimeMsField() {
-        return getTableName() + "." + watchTimeMs;
     }
 
     @Override
@@ -43,7 +32,8 @@ public class Settings implements Table {
                 "id int default 0, " +
                 dataPath + " text default null, " +
                 answerTimeMs + " int default 1000, " +
-                watchTimeMs + " int default 1000);");
+                watchTimeMs + " int default 1000, " +
+                dataShowInControl + " int default 'ФИО');");
         statement.close();
         statement = conn.createStatement();
         statement.execute("insert into " + getTableName() + " DEFAULT VALUES;");
@@ -76,15 +66,7 @@ public class Settings implements Table {
     public void setWatchTimeMs(int watchTimeMsValue) {
         String SQL = "UPDATE " + getTableName() + " SET " +
                 watchTimeMs + "='" + watchTimeMsValue + "' " + " WHERE " + id + "=0;";
-        try {
-            Statement statement = conn.createStatement();
-            statement.execute(SQL);
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
+        executeSQL(conn, SQL);
     }
 
     /**
@@ -106,16 +88,36 @@ public class Settings implements Table {
     }
 
     /**
+     * Добавляет в таблицу настройки показа полей в режиме самопроверки
+     */
+    public void setDataShowInControl(String fields) {
+        String SQL = "UPDATE " + getTableName() + " SET " +
+                dataShowInControl + "='" + fields + "' " + " WHERE " + id + "=0;";
+        executeSQL(conn, SQL);
+    }
+
+    /**
      * @return абсолютный путь хранения данных
      */
     public String getDataPath() {
-        String SQL = "SELECT " + dataPath + " FROM " + getTableName() +
+        return getStringSetting(dataPath);
+    }
+
+    /**
+     * @return настройки показа полей в режиме самопроверких
+     */
+    public String getDataShowInControl() {
+        return getStringSetting(dataShowInControl);
+    }
+
+    private String getStringSetting(String column) {
+        String SQL = "SELECT " + column + " FROM " + getTableName() +
                 " WHERE " + id + "=0;";
-        String actualDataPath = null;
+        String settingValue = null;
         try {
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(SQL);
-            actualDataPath = resultSet.getString(dataPath);
+            settingValue = resultSet.getString(column);
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
@@ -123,7 +125,7 @@ public class Settings implements Table {
             System.out.println(SQL);
             e.printStackTrace();
         }
-        return actualDataPath;
+        return settingValue;
     }
 
     /**

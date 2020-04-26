@@ -106,6 +106,21 @@ public class KeepDataHelper {
         return settingsTable.getDataPath();
     }
 
+    /**
+     * @return настройки показа полей в режиме самопроверких
+     * (строка с настройками через запятую_
+     */
+    public String getDataShowInControl() {
+        return settingsTable.getDataShowInControl();
+    }
+
+    /**
+     * Добавляет в таблицу настройки показа полей в режиме самопроверки
+     */
+    public void setDataShowInControl(String fields) {
+        settingsTable.setDataShowInControl(fields);
+    }
+
     public int getAnswerTimeMs() {
         return settingsTable.getAnswerTimeMs();
     }

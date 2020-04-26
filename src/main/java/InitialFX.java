@@ -28,6 +28,7 @@ import utils.KeepDataHelper;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -122,7 +123,10 @@ public class InitialFX extends Application {
             showModes.add(value.getName());
         }
         CheckComboBox modeChoiceBox = new CheckComboBox(showModes);
-        modeChoiceBox.getCheckModel().check(ShowModeEnum.NAME.getName());
+        String fieldsToShow = dataHelper.getDataShowInControl();
+        for (String field : fieldsToShow.split(",")) {
+            modeChoiceBox.getCheckModel().check(field);
+        }
         clearAllShowModeValues();
         modeChoiceBox.setPrefWidth(250);
         hBox1.getChildren().addAll(label, modeChoiceBox);
@@ -172,9 +176,15 @@ public class InitialFX extends Application {
                 return;
             }
             // выставляем моды
+            List<String> modesSetting = new ArrayList<>();
             for (String modeName : selectedModes) {
                 ShowModeEnum mode = ShowModeEnum.getModeByName(modeName);
                 mode.setEnabled(true);
+                modesSetting.add(modeName);
+            }
+            String settings = String.join(",", modesSetting);
+            if (!settings.equals(fieldsToShow)) {
+                dataHelper.setDataShowInControl(settings);
             }
             List<String> eventsFilterValue = eventsChoiceBox.getCheckModel().getCheckedItems();
             List<String> companiesFilterValue = companiesChoiceBox.getCheckModel().getCheckedItems();
