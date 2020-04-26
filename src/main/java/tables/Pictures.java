@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static tables.Table.appendWithDelimiter;
 
@@ -84,7 +85,7 @@ public class Pictures implements Table {
         executeSQL(conn, SQL);
     }
 
-    public List<String> getPersonPictures(int personId) {
+    public List<String> getPersonPictures(int personId, String dataPath) {
         List<String> pictures = new ArrayList<>();
         String SQL = "select " + path + " from " + getTableName() + " where " + person_id + "=?";
         try {
@@ -99,7 +100,9 @@ public class Pictures implements Table {
             System.out.println(SQL);
             e.printStackTrace();
         }
-        return pictures;
+        return pictures.stream()
+                .map(pictureName -> dataPath + "\\" + pictureName)
+                .collect(Collectors.toList());
     }
 
     /**

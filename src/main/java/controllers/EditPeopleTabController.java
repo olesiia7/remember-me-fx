@@ -69,7 +69,7 @@ public class EditPeopleTabController {
         fillDefaultFields(picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn);
 
         Callback<TableColumn<Person, String>, TableCell<Person, String>> cellFactory
-                = new Callback<TableColumn<Person, String>, TableCell<Person, String>>() {
+                = new Callback<>() {
             @Override
             public TableCell call(final TableColumn<Person, String> param) {
                 return new TableCell<Person, String>() {

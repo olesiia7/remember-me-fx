@@ -10,6 +10,7 @@ import utils.KeepDataHelper;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.SQLException;
 
 import static utils.AlertUtils.showErrorAlert;
@@ -75,10 +76,14 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
     private void setSampleImages() {
         for (int i = 1; i < 3; i++) {
             try {
-                Image image = new Image(new FileInputStream("src/main/resources/sample" + i + ".jpg"));
+                FileInputStream fileInputStream = new FileInputStream("src/main/resources/sample" + i + ".jpg");
+                Image image = new Image(fileInputStream);
+                fileInputStream.close();
                 VBox imageLayout = getImageLayout(image);
                 imageHBox.getChildren().addAll(imageLayout);
             } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

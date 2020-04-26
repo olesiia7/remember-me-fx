@@ -20,6 +20,7 @@ import utils.KeepDataHelper;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 
@@ -127,7 +128,9 @@ public abstract class DefaultPersonController {
     public void fillPersonImages(Person person, boolean withDeleteButton) {
         for (String picture : person.getPictures()) {
             try {
-                Image image = new Image(new FileInputStream(picture));
+                FileInputStream fileInputStream = new FileInputStream(picture);
+                Image image = new Image(fileInputStream);
+                fileInputStream.close();
                 VBox imageLayout;
                 if (withDeleteButton) {
                     imageLayout = getImageLayout(image);
@@ -138,6 +141,8 @@ public abstract class DefaultPersonController {
                 imageLayout.setAlignment(Pos.CENTER);
                 imageHBox.getChildren().addAll(imageLayout);
             } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

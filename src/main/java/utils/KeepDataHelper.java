@@ -59,7 +59,7 @@ public class KeepDataHelper {
         List<Person> allPeople = peopleTable.getAllPeople();
         for (Person person : allPeople) {
             // получаем изображения по каждому человеку
-            person.setPictures(picturesTable.getPersonPictures(person.getId()));
+            person.setPictures(picturesTable.getPersonPictures(person.getId(), settingsTable.getDataPath()));
             person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
         }
         return allPeople;
@@ -265,7 +265,7 @@ public class KeepDataHelper {
             ResultSet resultSet = statement.executeQuery(sqlBuilder.toString());
             people.addAll(getPeopleFromResultSet(resultSet));
             for (Person person : people) {
-                person.setPictures(picturesTable.getPersonPictures(person.getId()));
+                person.setPictures(picturesTable.getPersonPictures(person.getId(), settingsTable.getDataPath()));
                 person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
             }
             resultSet.close();
@@ -288,7 +288,7 @@ public class KeepDataHelper {
         List<Person> people = peopleTable.getPeopleById(sqlBuilder.toString());
         for (Person person : people) {
             // получаем изображения по каждому человеку
-            person.setPictures(picturesTable.getPersonPictures(person.getId()));
+            person.setPictures(picturesTable.getPersonPictures(person.getId(), settingsTable.getDataPath()));
             person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
         }
         return people;
@@ -312,7 +312,6 @@ public class KeepDataHelper {
      * @return список id только что созданных людей
      * @throws SQLException
      */
-    //ToDo: сделать массовую вставку (сейчас вставка по одному)
     @NonNull
     public void savePeople(@NonNull Person... people) throws SQLException {
         for (Person person : people) {
@@ -425,7 +424,8 @@ public class KeepDataHelper {
     public void deletePeoplePictures(@NonNull List<Integer> ids) {
         List<String> uninstallImages = new ArrayList<>();
         for (int id : ids) {
-            uninstallImages.addAll(picturesTable.getPersonPictures(id));
+            List<String> picturesName = picturesTable.getPersonPictures(id, getDataPath());
+            uninstallImages.addAll(picturesName);
         }
         deleteFiles(uninstallImages);
     }

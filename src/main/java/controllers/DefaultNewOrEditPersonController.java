@@ -154,9 +154,9 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     /**
      * Сохраняет выбранные изображения на компьютер
      *
-     * @return список <b><i>относительных</i></b> путей созхранения изображений
+     * @return список имен изображений изображений
+     * (чтобы найти путь, нужно взять дефолтный из настроек и имя файла)
      */
-    // ToDo: Брать основной путь файла из настроек (чтобы при переносе всё сработало)
     public List<String> saveImagesToComputer() {
         List<String> paths = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
@@ -172,12 +172,13 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
                 })
                 .collect(Collectors.toList());
         for (Image image : chosenImages) {
-            File file = new File(filePath + "/" + uuid + "_" + i++ + ".png");
+            String fileName = uuid + "_" + i++ + ".png";
+            File file = new File(filePath + "/" + fileName);
             try {
                 //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();
                 ImageIO.write(fromFXImage(image, null), "png", file);
-                paths.add(file.getPath());
+                paths.add(fileName);
             } catch (IOException e) {
                 e.printStackTrace();
             }

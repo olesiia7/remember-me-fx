@@ -11,11 +11,15 @@ import utils.KeepDataHelper;
 import java.io.File;
 import java.util.regex.Pattern;
 
+import static utils.FileUtils.moveFiles;
+
 public class SettingsController {
     private final KeepDataHelper dataHelper;
     @FXML
     public TextField dirPath;
     private DirectoryChooser directoryChooser;
+
+    private SettingsProfile initialSettings;
 
     @FXML
     private TextField answerTimeMs;
@@ -30,8 +34,8 @@ public class SettingsController {
 
     @FXML
     private void initialize() {
-        SettingsProfile settings = dataHelper.getSettings();
-        refresh(settings);
+        initialSettings = dataHelper.getSettings();
+        refresh(initialSettings);
         // ограничение ввода не цифр и не точки
         Pattern p = Pattern.compile("(\\d+)?");
         answerTimeMs.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -72,6 +76,9 @@ public class SettingsController {
     @FXML
     void save() {
         String path = dirPath.getText();
+        if (!path.equals(initialSettings.getDataPath())) {
+            moveFiles(initialSettings.getDataPath(), path);
+        }
         int answerTime = Integer.parseInt(answerTimeMs.getText());
         int watchTime = Integer.parseInt(watchTimeMs.getText());
         SettingsProfile settings = new SettingsProfile(path, answerTime, watchTime);

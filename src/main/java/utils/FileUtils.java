@@ -40,6 +40,24 @@ public class FileUtils {
     }
 
     /**
+     * Перемещает изображения из старой локации в новую
+     */
+    public static void moveFiles(String oldDirectoryPath, String newDirectoryPath) {
+        File dir = new File(oldDirectoryPath);
+        File[] arrFiles = dir.listFiles();
+        if (arrFiles != null) {
+            List<File> picList = Arrays.stream(arrFiles)
+                    .filter(pic -> pic.getPath().matches("[\\w\\W]*.png"))
+                    .collect(Collectors.toList());
+            picList.forEach(file -> {
+                String newPath = newDirectoryPath + "\\" + file.getName();
+                boolean isMoved = file.renameTo(new File(newPath));
+                System.out.println(file.getName() + " перенесен: " + isMoved);
+            });
+        }
+    }
+
+    /**
      * Удаляет все файлы, кроме БД и тех, которые есть в БД
      */
     public static void deleteFiles(List<String> pathToDelete) {

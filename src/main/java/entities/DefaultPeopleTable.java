@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,9 @@ public abstract class DefaultPeopleTable {
             if (pictures != null && !pictures.isEmpty()) {
                 String path = pictures.get(0);
                 try {
-                    Image image = new Image(new FileInputStream(path));
+                    FileInputStream fileInputStream = new FileInputStream(path);
+                    Image image = new Image(fileInputStream);
+                    fileInputStream.close();
                     ImageView imageView = new ImageView(image);
                     imageView.setPickOnBounds(true);
                     imageView.setPreserveRatio(true);
@@ -46,6 +49,8 @@ public abstract class DefaultPeopleTable {
                     imageView.setFitHeight(100);
                     return new SimpleObjectProperty<>(imageView);
                 } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
