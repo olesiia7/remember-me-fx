@@ -2,6 +2,7 @@ package controllers;
 
 import entities.Person;
 import javafx.fxml.FXML;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import listeners.NewPersonListener;
@@ -27,6 +28,7 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
     void initialize() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         gridPane.setMaxSize(screenSize.getWidth(), screenSize.getHeight());
+        events.setTooltip(new Tooltip("Добавье мероприятия через запятую"));
     }
 
     /**

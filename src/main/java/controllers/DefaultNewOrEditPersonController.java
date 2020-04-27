@@ -13,6 +13,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -64,6 +65,8 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     @Override
     void initialize() {
         super.initialize();
+        events.setTooltip(new Tooltip("Добавье мероприятия через запятую"));
+
         // кнопка добавления изображения
         setImageButton = new Button("Добавить ихображение");
         setImageButton.setOnAction(action -> addImage());
