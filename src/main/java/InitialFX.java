@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import layoutWindow.CreatePersonWindow;
 import layoutWindow.EditDataWindow;
+import layoutWindow.EditParsedEventWindow;
 import layoutWindow.PreWatchDataWindow;
 import layoutWindow.SettingsWindow;
 import org.controlsfx.control.CheckComboBox;
@@ -63,6 +64,7 @@ public class InitialFX extends Application {
         vBox.setPadding(new Insets(10));
         vBox.setAlignment(Pos.CENTER);
         Button addNewPersonButton = new Button("Добавить человека");
+        addNewPersonButton.setMaxWidth(Double.MAX_VALUE);
         addNewPersonButton.setOnAction(actionEvent -> {
             try {
                 new CreatePersonWindow(dataHelper, stage);
@@ -71,6 +73,7 @@ public class InitialFX extends Application {
             }
         });
         Button editDataButton = new Button("Редактировать записи");
+        editDataButton.setMaxWidth(Double.MAX_VALUE);
         editDataButton.setOnAction(actionEvent -> {
             try {
                 new EditDataWindow(dataHelper, stage);
@@ -79,6 +82,7 @@ public class InitialFX extends Application {
             }
         });
         Button watchDataButton = new Button("Режим просмотра");
+        watchDataButton.setMaxWidth(Double.MAX_VALUE);
         watchDataButton.setOnAction(actionEvent -> {
             try {
                 new PreWatchDataWindow(dataHelper, stage);
@@ -87,10 +91,12 @@ public class InitialFX extends Application {
             }
         });
         Button controlDataButton = new Button("Режим самопроверки");
+        controlDataButton.setMaxWidth(Double.MAX_VALUE);
         controlDataButton.setOnAction(actionEvent -> {
             createPreControlWindow(stage);
         });
         Button settingsButton = new Button("Настройки");
+        settingsButton.setMaxWidth(Double.MAX_VALUE);
         settingsButton.setOnAction(actionEvent -> {
             try {
                 new SettingsWindow(dataHelper, stage);
@@ -166,6 +172,8 @@ public class InitialFX extends Application {
         CheckBox startAgain = new CheckBox("Начать сначала");
         startAgain.setTooltip(new Tooltip("Если галочки нет, запомненные люди не будут показаны"));
 
+        Label hint = new Label("Подсказка: Вы можете импользовать Shift + стрелки, а также 'd', 'в', 'a' и 'ф', чтобы перемещаться");
+
         HBox buttonBox = new HBox();
         buttonBox.setSpacing(5);
         Button saveButton = new Button("Готово!");
@@ -211,10 +219,11 @@ public class InitialFX extends Application {
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
         buttonBox.getChildren().addAll(saveButton, cancelButton);
 
-        vBox.getChildren().addAll(hBox1, settingBox, filterLabel, hBox2, startAgain, buttonBox);
+        vBox.getChildren().addAll(hBox1, settingBox, filterLabel, hBox2, startAgain, hint, buttonBox);
         vBox.setAlignment(Pos.CENTER);
         Scene scene = new Scene(vBox);
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
