@@ -27,6 +27,7 @@ public class ControlPeopleController extends DefaultPersonController {
     private Button markUnrememberedButton;
     private Button rememberedButton;
     private Button mistakeButton;
+    private Scene scene;
 
     public ControlPeopleController(KeepDataHelper dataHelper, List<Person> people, int answerTimeInMs, Stage stage) {
         super(dataHelper);
@@ -44,6 +45,8 @@ public class ControlPeopleController extends DefaultPersonController {
         gridPane.setPrefHeight(gridPane.getPrefHeight() + 50);
         BorderPane borderPane = new BorderPane();
         rememberedButton = new Button(">");
+        rememberedButton.setMaxHeight(Double.MAX_VALUE);
+        rememberedButton.setPrefWidth(60);
         rememberedButton.setOnAction(action -> {
             showTrueAnswer(true);
         });
@@ -52,6 +55,8 @@ public class ControlPeopleController extends DefaultPersonController {
         borderPane.setRight(rememberedButton);
         borderPane.setCenter(gridPane);
         markUnrememberedButton = new Button("<");
+        markUnrememberedButton.setMaxHeight(Double.MAX_VALUE);
+        markUnrememberedButton.setPrefWidth(60);
         borderPane.setLeft(markUnrememberedButton);
         BorderPane.setAlignment(markUnrememberedButton, Pos.CENTER);
         BorderPane.setMargin(markUnrememberedButton, new Insets(5));
@@ -78,7 +83,24 @@ public class ControlPeopleController extends DefaultPersonController {
         BorderPane.setAlignment(mistakeButton, Pos.CENTER_RIGHT);
         BorderPane.setMargin(mistakeButton, new Insets(5));
         setNextPerson();
-        Scene scene = new Scene(borderPane);
+        scene = new Scene(borderPane);
+        scene.setOnKeyPressed(ke -> {
+            switch (ke.getCode().getName()) {
+                case "Right":
+                case "D":
+                case "В":
+                    showTrueAnswer(true);
+                    break;
+                case "Left":
+                case "A":
+                case "Ф":
+                    showTrueAnswer(false);
+                    break;
+                default:
+                    System.out.println(ke.getCode().getName());
+                    break;
+            }
+        });
         stage.setScene(scene);
         stage.show();
     }
@@ -110,13 +132,10 @@ public class ControlPeopleController extends DefaultPersonController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        setButtonDisabled(false);
-                        timer.cancel();
-                        setNextPerson();
-                    }
+                Platform.runLater(() -> {
+                    setButtonDisabled(false);
+                    timer.cancel();
+                    setNextPerson();
                 });
             }
         }, answerTimeInMs, 1000);
@@ -128,6 +147,8 @@ public class ControlPeopleController extends DefaultPersonController {
             rememberedButton.setDisable(true);
             markUnrememberedButton.setDisable(true);
             mistakeButton.setDisable(false);
+            scene.setOnKeyPressed(action -> {
+            });
             return;
         }
         clearAllFields();
