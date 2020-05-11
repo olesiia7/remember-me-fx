@@ -6,8 +6,10 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,29 @@ public class FileUtils {
                     .collect(Collectors.toList());
             deleteFiles(redundantPic);
         }
+    }
+
+    /**
+     * Перезаписывает лог файл
+     *
+     * @param logs логи
+     * @param path путь к сохранению файла логов
+     * @throws IOException исключение, если что-т оне так
+     */
+    public static void createLogFile(List<String> logs, String path) throws IOException {
+        deleteFiles(Collections.singletonList(path));
+        File file = new File(path);
+        file.createNewFile();
+        FileWriter writer = new FileWriter(path, true);
+        logs.forEach(text -> {
+            try {
+                writer.write(text + "\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        writer.flush();
+        writer.close();
     }
 
     /**
