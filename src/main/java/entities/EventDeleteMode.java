@@ -60,7 +60,7 @@ public enum EventDeleteMode {
         public void provideActions(KeepDataHelper dataHelper, int eventId,
                                    List<Integer> selectedPeopleIds,
                                    List<Integer> allParticipantsIds) {
-            dataHelper.deletePeopleWithoutEvent(allParticipantsIds);
+            dataHelper.deletePeopleButLeaveEvent(allParticipantsIds);
         }
     },
     ONLY_CHOSEN_PARTICIPANTS("только выбранные участники") {
@@ -75,7 +75,7 @@ public enum EventDeleteMode {
         public void provideActions(KeepDataHelper dataHelper, int eventId,
                                    List<Integer> chosenPeopleIds,
                                    List<Integer> allParticipantsIds) {
-            dataHelper.deletePeopleWithoutEvent(chosenPeopleIds);
+            dataHelper.deletePeopleButLeaveEvent(chosenPeopleIds);
         }
     };
 

@@ -1,9 +1,11 @@
 package controllers;
 
 import entities.EventInfo;
+import entities.Person;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -18,11 +20,15 @@ import utils.KeepDataHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.EMPTY_LIST;
+import static utils.AlertUtils.createConfirmationAlert;
 import static utils.AlertUtils.showErrorAlert;
 
 public class EditEventsTabController {
@@ -101,7 +107,22 @@ public class EditEventsTabController {
                         } else {
                             btn.setOnAction(event -> {
                                 EventInfo eventInfo = getTableView().getItems().get(getIndex());
-                                dataHelper.deleteEvent(eventInfo.getId());
+                                Alert alert = createConfirmationAlert("Удалить так же участников мероприятия?");
+                                alert.showAndWait().ifPresent(type -> {
+                                    // удалить мероприятие и участников
+                                    if (type.getText().equals("Да")) {
+                                        List<Person> eventsParticipants = dataHelper.getPeopleByCriteria(Collections.singletonList(eventInfo.getName()), EMPTY_LIST, false);
+                                        List<Integer> participantIds = eventsParticipants.stream()
+                                                .map(Person::getId)
+                                                .collect(Collectors.toList());
+                                        dataHelper.deletePeople(participantIds);
+                                        dataHelper.deleteEvent(eventInfo.getId());
+                                        // удалить только мероприятие
+                                    } else if (type.getText().equals("Нет")) {
+                                        dataHelper.deleteEvent(eventInfo.getId());
+                                    }
+                                    // если cancel - ничего не удалять
+                                });
                                 refreshData();
                             });
                             setGraphic(btn);

@@ -423,16 +423,14 @@ public class KeepDataHelper {
      * @return
      */
     public void deletePeople(@NonNull List<Integer> ids) {
-        deletePeopleWithoutEvent(ids);
+        deletePeopleButLeaveEvent(ids);
         eventsAndPeopleTable.deleteUnusedEvents();
     }
 
     /**
      * Удаляет людей, но оставляет мероприятие, даже если в нем нет участников
-     *
-     * @return
      */
-    public void deletePeopleWithoutEvent(@NonNull List<Integer> ids) {
+    public void deletePeopleButLeaveEvent(@NonNull List<Integer> ids) {
         deletePeoplePictures(ids);
         peopleTable.deletePerson(ids);
     }
