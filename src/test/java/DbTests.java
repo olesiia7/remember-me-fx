@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static entities.PersonDif.createPersonDif;
 import static java.util.Collections.EMPTY_LIST;
@@ -19,6 +20,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static utils.FileUtils.deleteUnusedFiles;
 
 public class DbTests {
@@ -29,16 +31,18 @@ public class DbTests {
         dataHelper = new KeepDataHelper("src/test/resources");
         dataHelper.createTablesIfNotExists(true);
         // удаление неиспользуемых картинок
-        deleteUnusedFiles(EMPTY_LIST, "src/test/resources");
+        File dataPath = new File("src/test/resources");
+        dataHelper.setDataPathSetting(dataPath.getAbsolutePath());
+        deleteUnusedFiles(EMPTY_LIST, dataPath.getPath());
     }
 
     /**
      * Проверяет, удаляются ли каскадно данные из изображений (и сами файлы изображения) и таблицы people
      */
     @Test
-    public void imageCascadeDeleteTest() throws SQLException, IOException {
+    public void imageCascadeDeleteTest() {
         Person person = getPersonExample("test1");
-        person.setPictures(Arrays.asList("src/test/resources/testImage.png", "src/test/resources/testImage2.png"));
+        person.setPictures(Arrays.asList("testImage.png", "testImage2.png"));
         dataHelper.savePerson(person);
         List<Person> savedPeople = dataHelper.getSavedPeople();
         assertEquals(1, savedPeople.size());
@@ -46,11 +50,15 @@ public class DbTests {
         assertEquals(2, picPath.size());
         for (String path : picPath) {
             File file = new File(path);
-            //noinspection ResultOfMethodCallIgnored
-            file.createNewFile();
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                file.createNewFile();
+            } catch (IOException e) {
+                System.out.println(e.getMessage() + ": " + file.getAbsolutePath());
+                fail();
+            }
             assertTrue(file.exists());
         }
-
         dataHelper.deletePeople(singletonList(savedPeople.get(0).getId()));
         savedPeople = dataHelper.getSavedPeople();
         assertEquals(0, savedPeople.size());
@@ -101,7 +109,7 @@ public class DbTests {
      * Проверяет, удаляются ли каскадно данные из изображений (и сами файлы изображения) и таблицы people
      */
     @Test
-    public void updatePersonTest() throws SQLException {
+    public void updatePersonTest() {
         Person person = getPersonExample("test1");
         Person person2 = getPersonExample("test2");
         person.setPictures(Arrays.asList("src/test/resources/testImage.png", "src/test/resources/testImage2.png"));
@@ -120,6 +128,13 @@ public class DbTests {
         expectedUpdatedPerson.setPictures(Arrays.asList("src/test/resources/testImage3.png", "src/test/resources/testImage4.png"));
         PersonDif personDif = createPersonDif(person, expectedUpdatedPerson);
         dataHelper.updatePerson(personDif);
+
+        // картинки хранятся относительным путем - нужно добавить его для сравнения
+        String dataPath = dataHelper.getDataPath();
+        expectedUpdatedPerson.setPictures(
+                expectedUpdatedPerson.getPictures().stream()
+                        .map(pic -> pic = dataPath + "\\" + pic)
+                        .collect(Collectors.toList()));
 
         savedPeople = dataHelper.getSavedPeople();
         assertEquals(2, savedPeople.size());

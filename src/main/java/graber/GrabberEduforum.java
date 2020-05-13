@@ -6,10 +6,9 @@ import org.jsoup.nodes.Element;
 import java.util.List;
 
 public class GrabberEduforum extends Grabber {
-    private static int i = 0;
 
-    public GrabberEduforum(String logPath) {
-        super("http://eduforum.spb.ru/", logPath);
+    public GrabberEduforum(String logPath, String eventName) {
+        super("http://eduforum.spb.ru/", logPath, eventName);
     }
 
     @Override
@@ -34,21 +33,9 @@ public class GrabberEduforum extends Grabber {
                     errorLog.add("Не удалось получить имя человека, class 'item wow fadeInDownBig'");
                     continue;
                 }
-                String photo = getImage(element.children().get(0), name);
+                String photo = getAndSaveImage(element.children().get(0), name);
                 addPerson(name, photo);
             }
-        }
-    }
-
-    @Override
-    // ToDo: написать правильный путь сохранения
-    protected String getImage(Element photoElm, String personName) {
-        String src = photoElm.select("[src]").get(0).attr("src");
-        String path = "src/main/java/imagesTemplate/img_" + i++ + ".png";
-        if (getAndSaveImage(src, personName, path)) {
-            return path;
-        } else {
-            return null;
         }
     }
 
@@ -61,7 +48,7 @@ public class GrabberEduforum extends Grabber {
             errorLog.add("Не удалось получить имя человека, class 'faces-item'");
             return;
         }
-        String photo = getImage(item.getElementsByClass("photo").get(0)
+        String photo = getAndSaveImage(item.getElementsByClass("photo").get(0)
                 .getElementsByClass("visible-xs").get(0), name);
         addPerson(name, photo);
     }

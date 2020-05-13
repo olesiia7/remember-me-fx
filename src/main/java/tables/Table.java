@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static utils.AlertUtils.showErrorAlert;
+
 public interface Table {
 
     /**
@@ -32,15 +34,24 @@ public interface Table {
     }
 
     default void executeSQL(Connection conn, String SQL) {
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             statement.execute(SQL);
-            statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
+    }
+
+    /**
+     * Выводит ошибку и SQL, который ее вызвал
+     *
+     * @param SQL SQL запрос
+     * @param e   возникшая ошибка
+     */
+    default void printSQLError(String SQL, SQLException e) {
+        String alertText = "Ошибка при исполнении SQL:\n" + SQL +
+                "\n" + e.getMessage();
+        System.out.println(alertText);
+        showErrorAlert(alertText);
     }
 
     default String getFieldWithQuote(String s) {

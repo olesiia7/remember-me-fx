@@ -2,6 +2,8 @@ import controllers.ControlPeopleController;
 import entities.EventInfo;
 import entities.Person;
 import entities.ShowModeEnum;
+import graber.GrabberEdcrunch;
+import graber.GrabberEduforum;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,6 +65,11 @@ public class InitialFX extends Application {
         vBox.setSpacing(5);
         vBox.setPadding(new Insets(10));
         vBox.setAlignment(Pos.CENTER);
+        Button startGrabberButton = new Button("Граббер");
+        startGrabberButton.setMaxWidth(Double.MAX_VALUE);
+        startGrabberButton.setOnAction(actionEvent -> {
+            startGrabberWindow(stage);
+        });
         Button addNewPersonButton = new Button("Добавить человека");
         addNewPersonButton.setMaxWidth(Double.MAX_VALUE);
         addNewPersonButton.setOnAction(actionEvent -> {
@@ -104,9 +111,54 @@ public class InitialFX extends Application {
                 e.printStackTrace();
             }
         });
-        vBox.getChildren().addAll(addNewPersonButton, editDataButton, watchDataButton, controlDataButton, settingsButton);
+        vBox.getChildren().addAll(startGrabberButton, addNewPersonButton, editDataButton, watchDataButton, controlDataButton, settingsButton);
         Scene scene = new Scene(vBox);
         stage.setTitle("Remember me");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void startGrabberWindow(Stage parentStage) {
+        Stage stage = new Stage();
+        VBox vBox = new VBox();
+        vBox.setSpacing(5);
+        vBox.setPadding(new Insets(5));
+        ObservableList<Object> sites = FXCollections.observableArrayList();
+        sites.addAll("eduforum.spb.ru", "edcrunch.ru");
+        ComboBox<String> siteChoiceBox = new ComboBox(sites);
+        siteChoiceBox.getSelectionModel().select("edcrunch.ru");
+        Button okButton = new Button("Выбрать");
+        okButton.setOnAction(action -> {
+            String selectedItem = siteChoiceBox.getSelectionModel().getSelectedItem();
+            List<Person> people;
+            String eventName;
+            String dataPath = dataHelper.getDataPath();
+            if (selectedItem.equals("edcrunch.ru")) {
+                String year = JOptionPane.showInputDialog("Введите год");
+                int yearInt = Integer.parseInt(year);
+                eventName = "Edcrunch " + year;
+                GrabberEdcrunch grabberEdcrunch = new GrabberEdcrunch(yearInt, dataPath, eventName);
+                people = grabberEdcrunch.getPeople();
+
+            } else {
+                eventName = "Петербургский международный образовательный форум";
+                GrabberEduforum grabberEduforum = new GrabberEduforum(dataPath, eventName);
+                people = grabberEduforum.getPeople();
+            }
+            if (people.isEmpty()) {
+                return;
+            }
+            int eventId = dataHelper.createEventAndGetId(eventName);
+            EventInfo eventInfo = new EventInfo(eventId, eventName, people.size());
+            try {
+                stage.close();
+                EditParsedEventWindow editParsedEventWindow = new EditParsedEventWindow(dataHelper, stage, eventInfo, people);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        vBox.getChildren().addAll(siteChoiceBox, okButton);
+        Scene scene = new Scene(vBox);
         stage.setScene(scene);
         stage.show();
     }

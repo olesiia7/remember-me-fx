@@ -3,7 +3,6 @@ package tables;
 import lombok.NonNull;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -69,16 +68,13 @@ public class EventsAndPeople implements Table {
         for (Integer eventId : eventIds) {
             String SQL = "SELECT * FROM " + getTableName() +
                     " WHERE " + personIdField + "=" + personId + " AND " + eventIdField + "=" + eventId + ";";
-            try {
-                Statement statement = conn.createStatement();
+            try (Statement statement = conn.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(SQL);
                 if (!resultSet.next()) {
                     notExistEventIds.add(eventId);
                 }
             } catch (SQLException e) {
-                System.out.println("Ошибка при исполнении SQL:");
-                System.out.println(SQL);
-                e.printStackTrace();
+                printSQLError(SQL, e);
             }
         }
         // если все мероприятия есть, ничего не делать
@@ -101,25 +97,23 @@ public class EventsAndPeople implements Table {
      */
     public Set<String> getPeopleEvents(List<Integer> personId) {
         Set<String> events = new HashSet<>();
-        StringBuilder SQL = new StringBuilder();
-        SQL.append("select distinct ").append(eventsTable.getName())
+        StringBuilder SQLBuilder = new StringBuilder();
+        SQLBuilder.append("select distinct ").append(eventsTable.getName())
                 .append(" from ").append(getTableName())
                 .append(" INNER JOIN ").append(eventsTable.getTableName()).append(" ON ")
                 .append(eventsTable.getId())
                 .append("=").append(getEventIdField())
                 .append(" where ")
                 .append(personIdField).append(" in (");
-        try {
-            SQL.append(personId.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
-            PreparedStatement ps = conn.prepareStatement(SQL.toString());
-            ResultSet resultSet = ps.executeQuery();
+        SQLBuilder.append(personId.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
+        String SQL = SQLBuilder.toString();
+        try (Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(SQLBuilder.toString());
             while (resultSet.next()) {
                 events.add(resultSet.getString(Events.name));
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return events;
     }
@@ -130,19 +124,17 @@ public class EventsAndPeople implements Table {
      */
     public int getCountEventsByEventId(int eventId) {
         int participantsCount = 0;
-        StringBuilder SQL = new StringBuilder();
-        SQL.append("select count(*) from ").append(getTableName())
+        StringBuilder SQLBuilder = new StringBuilder();
+        SQLBuilder.append("select count(*) from ").append(getTableName())
                 .append(" where ")
                 .append(eventIdField).append("=").append(eventId).append(";");
-        try {
-            PreparedStatement ps = conn.prepareStatement(SQL.toString());
-            ResultSet resultSet = ps.executeQuery();
+        String SQL = SQLBuilder.toString();
+        try (Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(SQLBuilder.toString());
             resultSet.next();
             participantsCount = resultSet.getInt("count(*)");
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return participantsCount;
     }

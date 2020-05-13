@@ -11,13 +11,26 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
+import static org.junit.Assert.fail;
 import static utils.FileUtils.getPictureFromClipboard;
 
 public class SaveImagesTests {
 
+    /**
+     * Перед началом теста скопируйте картинку в буфер обмена
+     */
     @Test
-    public void saveImageTest() throws IOException, UnsupportedFlavorException {
-        BufferedImage pictureFromClipboard1 = getPictureFromClipboard();
+    public void saveImageTest() {
+        BufferedImage pictureFromClipboard1 = null;
+        try {
+            pictureFromClipboard1 = getPictureFromClipboard();
+        } catch (IOException e) {
+            System.out.println("Ошибки при сохранении файла: " + e.getMessage());
+            fail();
+        } catch (UnsupportedFlavorException e) {
+            System.out.println("Вы выбрали не картинку");
+            fail();
+        }
         Image image = SwingFXUtils.toFXImage(pictureFromClipboard1, null);
 
         ImageView imageView = new ImageView();
@@ -25,7 +38,7 @@ public class SaveImagesTests {
 
         String uuid = UUID.randomUUID().toString();
         File filePath = new File("src/test/resources");
-        File file = new File(filePath + "/" + uuid + "_" + 1 + ".png");
+        File file = new File(filePath + "\\" + uuid + "_" + 1 + ".png");
         try {
             //noinspection ResultOfMethodCallIgnored
             file.createNewFile();
@@ -33,6 +46,8 @@ public class SaveImagesTests {
             ImageIO.write(im, "png", file);
         } catch (IOException e) {
             e.printStackTrace();
+            fail();
         }
+        file.deleteOnExit();
     }
 }

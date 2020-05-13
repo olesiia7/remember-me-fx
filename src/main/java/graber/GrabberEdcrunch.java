@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 public class GrabberEdcrunch extends Grabber {
-    private static int i = 0;
 
-    public GrabberEdcrunch(int year, String logPath) {
-        super("https://" + year + ".edcrunch.ru", logPath);
+    public GrabberEdcrunch(int year, String dataPath, String eventName) {
+        super("https://" + year + ".edcrunch.ru", dataPath, eventName);
     }
 
     @Override
@@ -54,18 +53,6 @@ public class GrabberEdcrunch extends Grabber {
     }
 
     @Override
-    // ToDo: написать правильный путь сохранения
-    protected String getImage(Element photoElm, String personName) {
-        String src = photoElm.select("[src]").get(0).attr("src");
-        String path = "src/main/java/imagesTemplate/img_" + i++ + ".png";
-        if (getAndSaveImage(src, personName, path)) {
-            return path;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     protected void getItemInfo(Element item) {
         String name = item.getElementsByClass("speakers-grid__item-name").get(0).text();
         if (isStringNullOrEmpty(name)) {
@@ -73,7 +60,7 @@ public class GrabberEdcrunch extends Grabber {
             return;
         }
         Element photoElm = item.getElementsByClass("speakers-grid__item-photo").get(0);
-        String image = getImage(photoElm, name);
+        String image = getAndSaveImage(photoElm, name);
 
         String description = item.getElementsByClass("speakers-grid__item-position").get(0).text();
         Set<String> events = new HashSet<>();

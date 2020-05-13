@@ -166,7 +166,6 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
         File filePath = new File(dataHelper.getDataPath());
         //noinspection ResultOfMethodCallIgnored
         filePath.mkdir();
-        int i = 0;
         List<Image> chosenImages = imageHBox.getChildren().stream()
                 .map(object -> {
                     VBox vBox = (VBox) object;
@@ -175,8 +174,8 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
                 })
                 .collect(Collectors.toList());
         for (Image image : chosenImages) {
-            String fileName = uuid + "_" + i++ + ".png";
-            File file = new File(filePath + "/" + fileName);
+            String fileName = uuid + ".png";
+            File file = new File(filePath + "\\" + fileName);
             try {
                 //noinspection ResultOfMethodCallIgnored
                 file.createNewFile();

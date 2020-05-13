@@ -7,7 +7,6 @@ import javafx.scene.control.TextInputControl;
 import listeners.PersonUpdatedListener;
 import utils.KeepDataHelper;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -86,15 +85,10 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
             }
         }
         if (isPersonChanged(personDif)) {
-            try {
-                dataHelper.updatePerson(personDif);
-                // уведомить, что данные пользователя обновились
-                if (listener != null) {
-                    listener.personUpdated();
-                }
-            } catch (SQLException e) {
-                System.out.println("Ошибки при записи в файл");
-                e.printStackTrace();
+            dataHelper.updatePerson(personDif);
+            // уведомить, что данные пользователя обновились
+            if (listener != null) {
+                listener.personUpdated();
             }
             getStage().close();
         } else {

@@ -96,9 +96,7 @@ public class Pictures implements Table {
                 pictures.add(resultSet.getString(path));
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return pictures.stream()
                 .map(pictureName -> dataPath + "\\" + pictureName)
@@ -120,9 +118,7 @@ public class Pictures implements Table {
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return pictures.stream()
                 .map(pictureName -> dataPath + "\\" + pictureName)

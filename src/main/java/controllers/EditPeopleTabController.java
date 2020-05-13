@@ -141,7 +141,7 @@ public class EditPeopleTabController {
     }
 
     @SafeVarargs
-    private final void setCheckComboBoxListeners(CheckComboBox<String>... checkComboBoxes) {
+    private void setCheckComboBoxListeners(CheckComboBox<String>... checkComboBoxes) {
         for (CheckComboBox<String> checkComboBox : checkComboBoxes) {
             final ObservableList<String> chosenItems = checkComboBox.getCheckModel().getCheckedItems();
             chosenItems.addListener((ListChangeListener<String>) c -> {

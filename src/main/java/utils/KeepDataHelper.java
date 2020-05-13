@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static tables.People.getPeopleFromResultSet;
+import static tables.Settings.SettingsTime.ANSWER_TIME;
+import static tables.Settings.SettingsTime.WATCH_TIME;
 import static utils.FileUtils.deleteFiles;
 
 @SuppressWarnings("JavaDoc")
@@ -125,12 +127,18 @@ public class KeepDataHelper {
         settingsTable.setDataShowInControl(fields);
     }
 
+    /**
+     * @return время в мс для показа правильного ответа в режиме самопроверки
+     */
     public int getAnswerTimeMs() {
-        return settingsTable.getAnswerTimeMs();
+        return settingsTable.getSettingsTimeMs(ANSWER_TIME);
     }
 
+    /**
+     * @return время в мс для показа человека в режиме быстрого просмотра
+     */
     public int getWatchTimeMs() {
-        return settingsTable.getWatchTimeMs();
+        return settingsTable.getSettingsTimeMs(WATCH_TIME);
     }
 
     /**
@@ -310,10 +318,22 @@ public class KeepDataHelper {
      *
      * @param people список новых людей, которые необходимо вставить в БД
      * @return список id только что созданных людей
-     * @throws SQLException
      */
     @NonNull
-    public void savePeople(@NonNull Person... people) throws SQLException {
+    public void savePeople(@NonNull Person... people) {
+        for (Person person : people) {
+            savePerson(person);
+        }
+    }
+
+    /**
+     * Массово добавляет людей в БД и возвращает их id
+     *
+     * @param people список новых людей, которые необходимо вставить в БД
+     * @return список id только что созданных людей
+     */
+    @NonNull
+    public void savePeople(@NonNull List<Person> people) {
         for (Person person : people) {
             savePerson(person);
         }
@@ -325,7 +345,7 @@ public class KeepDataHelper {
      * @param person данные, которые необходимо сохранить
      * @throws SQLException
      */
-    public void savePerson(@NonNull Person person) throws SQLException {
+    public void savePerson(@NonNull Person person) {
         // сохранение в таблицу человека
         peopleTable.savePersonAndGetId(person);
         // сохранение в таблицу картинок человека
@@ -358,9 +378,8 @@ public class KeepDataHelper {
      * Перезаписывает данные пользователя
      *
      * @param personDif изменения человека
-     * @throws SQLException
      */
-    public void updatePerson(@NonNull PersonDif personDif) throws SQLException {
+    public void updatePerson(@NonNull PersonDif personDif) {
         // обновление данных человека
         if (personDif.isNameChanged()
                 || personDif.isCompanyChanged()

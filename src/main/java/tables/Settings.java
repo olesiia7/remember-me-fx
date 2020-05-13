@@ -16,6 +16,16 @@ public class Settings implements Table {
     public static final String watchTimeMs = "watchTimeMs";
     public static final String dataShowInControl = "dataShowInControl";
 
+    /**
+     * определяет, какое время из настроек нужно получить
+     */
+    public enum SettingsTime {
+        // время в мс для показа человека в режиме быстрого просмотра
+        WATCH_TIME,
+        // время в мс для показа правильного ответа в режиме самопроверки
+        ANSWER_TIME
+    }
+
     public Settings(Connection conn) {
         this.conn = conn;
     }
@@ -54,9 +64,7 @@ public class Settings implements Table {
             statement.execute(SQL);
             statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
     }
 
@@ -121,53 +129,38 @@ public class Settings implements Table {
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return settingValue;
     }
 
     /**
-     * @return время в мс для показа правильного ответа в режиме самопроверки
+     * @return время в мс в зависимости от режима
      */
-    public int getAnswerTimeMs() {
-        String SQL = "SELECT " + answerTimeMs + " FROM " + getTableName() +
+    public int getSettingsTimeMs(SettingsTime settingsTime) {
+        String timeColumn = "";
+        switch (settingsTime) {
+            case WATCH_TIME:
+                timeColumn = watchTimeMs;
+                break;
+            case ANSWER_TIME:
+                timeColumn = answerTimeMs;
+            default:
+                System.out.println("Неверный выбор времени");
+        }
+        String SQL = "SELECT " + timeColumn + " FROM " + getTableName() +
                 " WHERE " + id + "=0;";
         int actualAnswerTimeMs = 1000;
         try {
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(SQL);
-            actualAnswerTimeMs = resultSet.getInt(answerTimeMs);
+            actualAnswerTimeMs = resultSet.getInt(timeColumn);
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return actualAnswerTimeMs;
-    }
-
-    /**
-     * @return время в мс для показа человека в режиме быстрого просмотра
-     */
-    public int getWatchTimeMs() {
-        String SQL = "SELECT " + watchTimeMs + " FROM " + getTableName() +
-                " WHERE " + id + "=0;";
-        int actualWatchTimeMs = 1000;
-        try {
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(SQL);
-            actualWatchTimeMs = resultSet.getInt(watchTimeMs);
-            resultSet.close();
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
-        }
-        return actualWatchTimeMs;
     }
 
     /**
@@ -187,9 +180,7 @@ public class Settings implements Table {
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return settings;
     }

@@ -3,7 +3,6 @@ package tables;
 import lombok.NonNull;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -49,25 +48,27 @@ public class Events implements Table {
      * Добавляет в таблицу мероприятия человека
      *
      * @param newEvents названия мероприятий, которые нужно добавить
-     * @throws SQLException sql exception
      */
     // ToDo: написать массовую вставку мероприятий
-    public Set<Integer> addPersonEventsAndGetIds(Set<String> newEvents) throws SQLException {
-        String SQL = "INSERT INTO " + getTableName() + " (" + name + ") " +
-                "VALUES (?);";
+    public Set<Integer> addPersonEventsAndGetIds(Set<String> newEvents) {
+        String SQL;
         Set<Integer> eventsIds = new HashSet<>();
         for (String event : newEvents) {
+            SQL = "INSERT INTO " + getTableName() + " (" + name + ") " +
+                    "VALUES (" + getFieldWithQuote(event) + ");";
             // проверка, есть ли уже существующий event с таким именем
             Integer eventId = checkEventExistAndGetId(event);
             if (eventId != null) {
                 eventsIds.add(eventId);
                 continue;
             }
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            ps.setString(1, event);
-            ps.execute();
-            ps.close();
-            eventsIds.add(getEventId(event));
+            try (Statement ps = conn.createStatement()) {
+                ps.execute(SQL);
+                ps.close();
+                eventsIds.add(getEventId(event));
+            } catch (SQLException e) {
+                printSQLError(SQL, e);
+            }
         }
         return eventsIds;
     }
@@ -105,9 +106,7 @@ public class Events implements Table {
             statement.close();
             resultSet.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return allEvents;
     }
@@ -118,8 +117,7 @@ public class Events implements Table {
     public Map<Integer, String> getAllEvents() {
         Map<Integer, String> allEvents = new HashMap<>();
         String SQL = "Select * from " + getTableName() + " order by " + name + ";";
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             ResultSet resultSet = statement.executeQuery(SQL);
             while (resultSet.next()) {
                 allEvents.put(resultSet.getInt(id), resultSet.getString(name));
@@ -127,9 +125,7 @@ public class Events implements Table {
             statement.close();
             resultSet.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return allEvents;
     }
@@ -147,9 +143,7 @@ public class Events implements Table {
             resultSet.close();
             return eventId;
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
             return null;
         }
     }
@@ -170,9 +164,7 @@ public class Events implements Table {
             statement.close();
             return eventId;
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
             return null;
         }
     }

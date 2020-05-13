@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.jsoup.Jsoup.connect;
 import static utils.AlertUtils.showErrorAlert;
@@ -24,20 +25,24 @@ import static utils.FileUtils.createLogFile;
  */
 public abstract class Grabber {
     protected final String baseURL;
+    protected final String eventName;
+    protected final String dataPath;
     protected static final List<Person> people = new ArrayList<>();
     protected static final List<String> errorLog = new ArrayList<>();
 
-    public Grabber(String baseURL, String logPath) {
+    public Grabber(String baseURL, String dataPath, String eventName) {
         this.baseURL = baseURL;
+        this.eventName = eventName;
+        this.dataPath = dataPath;
         showInformationAlert("Предупреждение",
                 "Сейчас начнется загрузка участников, пожалуйста, подождите несколько минут");
         people.clear();
         startParsing();
         if (!errorLog.isEmpty()) {
             showErrorAlert("В ходе выполнения было получено несколько ошибок, " +
-                    "вы можете ознакомиться с ними в файле " + logPath + "\\grabberLogs.txt");
+                    "вы можете ознакомиться с ними в файле " + dataPath + "\\grabberLogs.txt");
             try {
-                createLogFile(errorLog, logPath + "/grabberLogs.txt");
+                createLogFile(errorLog, dataPath + "/grabberLogs.txt");
             } catch (IOException e) {
                 showErrorAlert("Ошибка при сохранении файла с логами: " + e.getMessage());
             }
@@ -72,15 +77,6 @@ public abstract class Grabber {
     protected abstract void getItemInfo(Element item);
 
     /**
-     * Выцепляет картинку с сайта и сохраняет ее
-     *
-     * @param photoElm   елемент, содержащий ссылку на фото
-     * @param personName ФИО
-     * @return относительный путь сохраненной картинки (или null)
-     */
-    protected abstract String getImage(Element photoElm, String personName);
-
-    /**
      * @param text строку, которую надо проверить
      * @return true, если в строка == null или в ней ничего нет
      */
@@ -100,6 +96,7 @@ public abstract class Grabber {
             return;
         }
         Set<String> events = new HashSet<>();
+        events.add(eventName);
         people.add(new Person(name, events, "", "", "",
                 Collections.singletonList(photo)));
     }
@@ -107,24 +104,27 @@ public abstract class Grabber {
     /**
      * Загружает изображение по src и сохранят на компьютер по указанному пути
      *
-     * @param src        source картинки
+     * @param photoElm   элемент, содержащий ссылку на фото
      * @param personName ФИО человека
-     * @param path       относительный путь сохранения файла
      * @return относительный путь сохранения файла
      */
-    protected boolean getAndSaveImage(String src, String personName, String path) {
+    protected String getAndSaveImage(Element photoElm, String personName) {
+        String src = photoElm.select("[src]").get(0).attr("src");
+        String uuid = UUID.randomUUID().toString();
+        String path = uuid + ".png";
+        String absolutePath = dataPath + "\\" + path;
         String imageURL = baseURL + src;
         try {
             Connection.Response resultImageResponse = connect(imageURL).ignoreContentType(true).execute();
-            File file = new File(path);
+            File file = new File(absolutePath);
             FileOutputStream out = (new FileOutputStream(file));
             out.write(resultImageResponse.bodyAsBytes());
             out.close();
-            return true;
+            return path;
         } catch (IOException e) {
             errorLog.add("Ошибка при сохранении изображения для " + personName +
                     " (" + imageURL + "): " + e.getMessage());
-            return false;
+            return null;
         }
     }
 

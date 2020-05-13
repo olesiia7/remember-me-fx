@@ -15,12 +15,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -32,16 +29,12 @@ import org.controlsfx.control.CheckComboBox;
 import utils.KeepDataHelper;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static entities.DefaultPeopleTable.fillCheckBoxColumn;
-import static entities.DefaultPeopleTable.fillDefaultFields;
 import static entities.EventDeleteMode.ALL;
 import static entities.EventDeleteMode.ONLY_CHOSEN_PARTICIPANTS;
 import static entities.EventDeleteMode.ONLY_EVENT_FOR_CHOSEN_PARTICIPANTS;
@@ -49,40 +42,17 @@ import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 import static utils.AlertUtils.showErrorAlert;
 
-public class EditEventController {
+public class EditEventController extends DefaultEventController {
     @FXML
     private TextField eventName;
     @FXML
     private TextField partCount;
-    @FXML
-    private TableView<PersonWithSelected> tablePeople;
-    @FXML
-    private TableColumn<PersonWithSelected, CheckBox> selectedColumn;
-    @FXML
-    private TableColumn<Person, ImageView> picColumn;
-    @FXML
-    private TableColumn<Person, String> nameColumn;
-    @FXML
-    private TableColumn<Person, String> eventsColumn;
-    @FXML
-    private TableColumn<Person, String> companyColumn;
-    @FXML
-    private TableColumn<Person, String> roleColumn;
-    @FXML
-    private TableColumn<Person, String> descriptionColumn;
-
-    private final EventInfo eventInfo;
-    private final KeepDataHelper dataHelper;
-    private final Stage ownStage;
-    private EventsUpdatedListener listener;
-    private final ObservableList<PersonWithSelected> peopleData = FXCollections.observableArrayList();
 
     public EditEventController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage) {
-        this.dataHelper = dataHelper;
-        this.eventInfo = eventInfo;
-        this.ownStage = ownStage;
+        super(dataHelper, eventInfo, ownStage);
     }
 
+    @Override
     @FXML
     protected void initialize() {
         // заполняем данными человека
@@ -102,33 +72,15 @@ public class EditEventController {
         partCount.setText(eventInfo.getParticipantsCount());
 
         // устанавливаем тип и значение которое должно хранится в колонке
-        fillDefaultFields(picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn);
-        fillCheckBoxColumn(selectedColumn, peopleData);
-        refreshData(true);
+       super.initialize();
     }
 
-
-    /**
-     * Обновляет данные в таблице
-     *
-     * @param requestPeople нужно ли запрашивать заново людей из БД
-     */
-    private void refreshData(boolean requestPeople) {
+    @Override
+    protected void refreshData(boolean requestPeople) {
         List<PersonWithSelected> peopleWithSelected;
         if (requestPeople) {
             List<Person> people = dataHelper.getPeopleByCriteria(singletonList(eventInfo.getName()), EMPTY_LIST, false);
-            peopleWithSelected = new ArrayList<>();
-            for (Person person : people) {
-                // если не новый пользователь, то ставим прошлую отметку
-                Optional<PersonWithSelected> optional = peopleData.stream()
-                        .filter(pers -> pers.getId() == person.getId())
-                        .findFirst();
-                boolean selected = false;
-                if (optional.isPresent()) {
-                    selected = optional.get().isSelected();
-                }
-                peopleWithSelected.add(new PersonWithSelected(selected, person));
-            }
+            peopleWithSelected = setSelectionForPeople(people);
             // обновляем кол-во участников мероприятия
             partCount.setText("" + peopleWithSelected.size());
             notifyListeners();
@@ -143,18 +95,6 @@ public class EditEventController {
         if (listener != null) {
             listener.eventUpdated();
         }
-    }
-
-    /**
-     * Обновление данных таблицы
-     *
-     * @param people список людей
-     */
-    public void setDataToTable(List<PersonWithSelected> people) {
-        peopleData.clear();
-        peopleData.addAll(people);
-        tablePeople.setItems(peopleData);
-//        setAutoResize();
     }
 
     @FXML
@@ -208,16 +148,21 @@ public class EditEventController {
                 ownStage.close();
             }
         });
-        Button cancelButton = new Button("Отменить");
-        cancelButton.setOnAction(action -> {
-            stage.close();
-        });
+        Button cancelButton = createCancelButton(stage);
         hbox.getChildren().addAll(okButton, cancelButton);
         vBox.getChildren().addAll(chooseDeleteModeLabel, modeChoiceBox, modeInfo, hbox);
         Scene scene = new Scene(vBox);
         stage.setScene(scene);
         stage.setTitle("Выберите режим удаления");
         stage.show();
+    }
+
+    private Button createCancelButton(Stage stage) {
+        Button cancelButton = new Button("Отменить");
+        cancelButton.setOnAction(action -> {
+            stage.close();
+        });
+        return cancelButton;
     }
 
     @FXML
@@ -279,10 +224,7 @@ public class EditEventController {
             notifyListeners();
             stage.close();
         });
-        Button cancelButton = new Button("Отменить");
-        cancelButton.setOnAction(action -> {
-            stage.close();
-        });
+        Button cancelButton = createCancelButton(stage);
         hbox.getChildren().addAll(okButton, cancelButton);
         vBox.getChildren().addAll(chooseEventsToMoveLabel, eventsCheckBox, leaveInCurrentGroupCheckBox, hbox);
         Scene scene = new Scene(vBox);

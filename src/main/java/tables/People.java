@@ -50,15 +50,16 @@ public class People implements Table {
      * Сохраняет человека в таблицу
      *
      * @param person человек, которого нужно сохранить
-     * @throws SQLException sql exception
      */
-    public void savePersonAndGetId(Person person) throws SQLException {
-        String SQL = "INSERT INTO " + getTableName() + " (" + getFieldNamesWithoutIdAndRemembered() + ") " +
-                "VALUES (?, ?, ?, ?);";
-        PreparedStatement ps = conn.prepareStatement(SQL);
-        setPersonInfo(person, ps);
-        ps.execute();
-        ps.close();
+    public void savePersonAndGetId(Person person) {
+        String SQL = "INSERT INTO " + getTableName() +
+                " (" + getFieldNamesWithoutIdAndRemembered() + ") " +
+                "VALUES (" +
+                getFieldWithQuote(person.getName()) + ", " +
+                getFieldWithQuote(person.getCompany()) + ", " +
+                getFieldWithQuote(person.getRole()) + ", " +
+                getFieldWithQuote(person.getDescription()) + ");";
+        executeSQL(conn, SQL);
         setPersonId(person);
     }
 
@@ -99,16 +100,13 @@ public class People implements Table {
     public List<Person> getAllPeople() {
         List<Person> people = new ArrayList<>();
         String SQL = "Select * from " + getTableName() + ";";
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             ResultSet peopleResultSet = statement.executeQuery(SQL);
             people.addAll(getPeopleFromResultSet(peopleResultSet));
             statement.close();
             peopleResultSet.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return people;
     }
@@ -122,14 +120,11 @@ public class People implements Table {
     public boolean isPersonWithNameExist(String personName) {
         String SQL = "Select * from " + getTableName() +
                 " where " + name + " = " + getFieldWithQuote(personName) + ";";
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             ResultSet personResultSet = statement.executeQuery(SQL);
             return personResultSet.next();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return false;
     }
@@ -222,19 +217,23 @@ public class People implements Table {
      * Достает id только что созданного человека и сохраняет его
      *
      * @param person данные, по которым нужно найти id
-     * @throws SQLException sql exception
      */
-    private void setPersonId(@NonNull Person person) throws SQLException {
+    private void setPersonId(@NonNull Person person) {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
-                " WHERE " + name + "=? AND " + company + "=? " +
-                "AND " + role + "=? AND " + description + "=?;";
-        PreparedStatement ps = conn.prepareStatement(SQL);
-        setPersonInfo(person, ps);
-        ResultSet resultSet = ps.executeQuery();
-        int id = resultSet.getInt(People.id);
-        person.setId(id);
-        ps.close();
-        resultSet.close();
+                " WHERE " +
+                name + "=" + getFieldWithQuote(person.getName()) + " AND " +
+                company + "=" + getFieldWithQuote(person.getCompany()) + " AND " +
+                role + "=" + getFieldWithQuote(person.getRole()) + " AND " +
+                description + "=" + getFieldWithQuote(person.getDescription()) + ";";
+        try (Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(SQL);
+            int id = resultSet.getInt(People.id);
+            person.setId(id);
+            statement.close();
+            resultSet.close();
+        } catch (SQLException e) {
+            printSQLError(SQL, e);
+        }
     }
 
     /**
@@ -269,8 +268,7 @@ public class People implements Table {
         List<String> companies = new ArrayList<>();
         String SQL = "Select distinct " + company +
                 " from " + getTableName() + " order by " + company + ";";
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             ResultSet companiesResultSet = statement.executeQuery(SQL);
             while (companiesResultSet.next()) {
                 companies.add(companiesResultSet.getString(company));
@@ -278,9 +276,7 @@ public class People implements Table {
             statement.close();
             companiesResultSet.close();
         } catch (SQLException e) {
-            System.out.println("Ошибка при исполнении SQL:");
-            System.out.println(SQL);
-            e.printStackTrace();
+            printSQLError(SQL, e);
         }
         return companies;
     }

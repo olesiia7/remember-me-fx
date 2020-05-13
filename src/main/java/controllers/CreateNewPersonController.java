@@ -12,7 +12,6 @@ import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLException;
 
 import static utils.AlertUtils.showErrorAlert;
 
@@ -47,15 +46,10 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
             return;
         }
         Person person = createPersonFromFields();
-        try {
-            dataHelper.savePerson(person);
-            // уведомить, что создан новый человек
-            if (listener != null) {
-                listener.newPersonCreated();
-            }
-        } catch (SQLException e) {
-            System.out.println("Ошибки при записи в файл");
-            e.printStackTrace();
+        dataHelper.savePerson(person);
+        // уведомить, что создан новый человек
+        if (listener != null) {
+            listener.newPersonCreated();
         }
         getStage().close();
     }
