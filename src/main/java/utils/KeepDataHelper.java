@@ -77,6 +77,23 @@ public class KeepDataHelper {
     }
 
     /**
+     * Возвращает человека с таким же ФИО
+     *
+     * @param personName имя искомого человека
+     * @return Person, если уже существует, null - если нет
+     */
+    public Person getPersonWithName(String personName) {
+        List<Person> people = peopleTable.getPersonWithName(personName);
+        if (people.size() == 0) {
+            return null;
+        }
+        Person person = people.get(0);
+        person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
+        person.setPictures(picturesTable.getPersonPictures(person.getId(), getDataPath()));
+        return person;
+    }
+
+    /**
      * Создает таблицы, если они не существуют
      *
      * @throws SQLException
@@ -377,6 +394,18 @@ public class KeepDataHelper {
         picturesTable.setPersonPictures(person.getId(), person.getPictures());
         Set<Integer> eventIds = eventsTable.addPersonEventsAndGetIds(person.getEvents());
         eventsAndPeopleTable.addPersonEvents(person.getId(), eventIds);
+    }
+
+
+    /**
+     * Ищет человека в БД по всем полям, кроме id и картинок
+     *
+     * @param person данные человека (id и картинки не учитываются)
+     * @return true, если человек существует, false в противном случае,
+     * null - в случае ошибки
+     */
+    public Boolean isPersonExist(@NonNull Person person) {
+        return peopleTable.isPersonExist(person);
     }
 
     /**

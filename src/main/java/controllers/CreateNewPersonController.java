@@ -2,6 +2,7 @@ package controllers;
 
 import entities.Person;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
@@ -11,7 +12,9 @@ import utils.KeepDataHelper;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static utils.AlertUtils.createCustomAlert;
 import static utils.AlertUtils.showErrorAlert;
 
 public class CreateNewPersonController extends DefaultNewOrEditPersonController {
@@ -39,12 +42,42 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
             showErrorAlert("ФИО не может быть пустым");
             return;
         }
-        boolean personExist = dataHelper.isPersonWithNameExist(personName);
-        if (personExist) {
-            showErrorAlert("Пользователь с таким ФИО уже существует");
+        boolean personNameExist = dataHelper.isPersonWithNameExist(personName);
+        AtomicBoolean close = new AtomicBoolean(false);
+        if (personNameExist) {
+            Alert customAlert = createCustomAlert("Пользователь с таким ФИО уже существует, Вы уверены, что хотите сохранить?",
+                    "Посмотреть дубликат",
+                    "Да",
+                    "Нет");
+            customAlert.showAndWait().ifPresent(type -> {
+                String choice = type.getText();
+                switch (choice) {
+                    case "Посмотреть дубликат":
+                        // открыть в отдельном окне страничку дубликата
+                        showDuplicatePerson(dataHelper.getPersonWithName(personName));
+                        close.set(true);
+                        break;
+                    case "Нет":
+                        getStage().close();
+                        close.set(true);
+                        return;
+                    case "Да":
+                    default:
+                        break;
+                }
+            });
+        }
+        // ничего не делаем, если отменили сохранение
+        if (close.get()) {
             return;
         }
         Person person = createPersonFromFields();
+        // если человек с идентичными данными существует - отменить вставку
+        if (dataHelper.isPersonExist(person)) {
+            showErrorAlert("Полностью идентичный человек уже создан. Сохранение отменено");
+            getStage().close();
+            return;
+        }
         dataHelper.savePerson(person);
         // уведомить, что создан новый человек
         if (listener != null) {

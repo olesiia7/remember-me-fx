@@ -3,6 +3,7 @@ package controllers;
 import entities.Person;
 import entities.PersonDif;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputControl;
 import listeners.PersonUpdatedListener;
 import utils.KeepDataHelper;
@@ -10,10 +11,12 @@ import utils.KeepDataHelper;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static entities.PersonDif.createPersonDif;
 import static entities.PersonDif.isCollectionSameWithoutOrder;
 import static entities.PersonDif.isPersonChanged;
+import static utils.AlertUtils.createCustomAlert;
 import static utils.AlertUtils.showErrorAlert;
 import static utils.AlertUtils.showInformationAlert;
 
@@ -78,13 +81,38 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
         PersonDif personDif = createPersonDif(person, updatedPerson);
         // проверка - чтобы не было переименования на существующего пользователя с таким же ФИО
         if (personDif.isNameChanged()) {
-            boolean personExist = dataHelper.isPersonWithNameExist(personDif.getName());
-            if (personExist) {
-                showErrorAlert("Пользователь с таким ФИО уже существует");
+            boolean personNameExist = dataHelper.isPersonWithNameExist(personDif.getName());
+            AtomicBoolean close = new AtomicBoolean(false);
+            if (personNameExist) {
+                Alert customAlert = createCustomAlert("Пользователь с таким ФИО уже существует, Вы уверены, что хотите сохранить?",
+                        "Посмотреть дубликат",
+                        "Да",
+                        "Нет");
+                customAlert.showAndWait().ifPresent(type -> {
+                    String choice = type.getText();
+                    switch (choice) {
+                        case "Посмотреть дубликат":
+                            // открыть в отдельном окне страничку дубликата
+                            showDuplicatePerson(dataHelper.getPersonWithName(personDif.getName()));
+                            close.set(true);
+                            break;
+                        case "Нет":
+                            getStage().close();
+                            close.set(true);
+                            return;
+                        case "Да":
+                        default:
+                            break;
+                    }
+                });
+            }
+            // ничего не делаем, если отменили сохранение
+            if (close.get()) {
                 return;
             }
         }
-        if (isPersonChanged(personDif)) {
+        if (isPersonChanged(personDif))
+        {
             dataHelper.updatePerson(personDif);
             // уведомить, что данные пользователя обновились
             if (listener != null) {
@@ -94,6 +122,7 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
         } else {
             showInformationAlert("Изменения не применены", "Вы не изменили ни одно поле");
         }
+
     }
 
     /**

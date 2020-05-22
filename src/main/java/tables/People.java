@@ -60,7 +60,7 @@ public class People implements Table {
                 getFieldWithQuote(person.getRole()) + ", " +
                 getFieldWithQuote(person.getDescription()) + ");";
         executeSQL(conn, SQL);
-        setPersonId(person);
+        getAndSetPersonId(person);
     }
 
     /**
@@ -129,6 +129,24 @@ public class People implements Table {
         return false;
     }
 
+    /**
+     * Возвращает человека с таким же ФИО
+     *
+     * @param personName имя искомого человека
+     * @return Person, если уже существует, null - если нет
+     */
+    public List<Person> getPersonWithName(String personName) {
+        String SQL = "Select * from " + getTableName() +
+                " where " + name + " = " + getFieldWithQuote(personName) + ";";
+        try (Statement statement = conn.createStatement()) {
+            ResultSet personResultSet = statement.executeQuery(SQL);
+            return getPeopleFromResultSet(personResultSet);
+        } catch (SQLException e) {
+            printSQLError(SQL, e);
+        }
+        return null;
+    }
+
     public List<Person> getPeopleById(@NonNull Set<Integer> peopleId) {
         List<Person> people = new ArrayList<>();
         if (!peopleId.isEmpty()) {
@@ -155,13 +173,13 @@ public class People implements Table {
     }
 
     /**
-     * @param idSQL sql, в котором будут получены id
+     * @param ids sql, в котором будут получены id или сами id
      * @return список людей по выбранным id
      */
-    public List<Person> getPeopleById(String idSQL) {
+    public List<Person> getPeopleById(String ids) {
         List<Person> people = new ArrayList<>();
         StringBuilder SQLBuilder = new StringBuilder("select * from " + getTableName() +
-                " where " + id + " in (").append(idSQL).append(");");
+                " where " + id + " in (").append(ids).append(");");
         try {
             Statement statement = conn.createStatement();
             ResultSet peopleResultSet = statement.executeQuery(SQLBuilder.toString());
@@ -214,11 +232,11 @@ public class People implements Table {
     }
 
     /**
-     * Достает id только что созданного человека и сохраняет его
+     * Достает id только что созданного человека и сохраняет его в Person
      *
      * @param person данные, по которым нужно найти id
      */
-    private void setPersonId(@NonNull Person person) {
+    private void getAndSetPersonId(@NonNull Person person) {
         String SQL = "SELECT " + id + " FROM " + getTableName() +
                 " WHERE " +
                 name + "=" + getFieldWithQuote(person.getName()) + " AND " +
@@ -233,6 +251,29 @@ public class People implements Table {
             resultSet.close();
         } catch (SQLException e) {
             printSQLError(SQL, e);
+        }
+    }
+
+    /**
+     * Ищет человека в БД по всем полям, кроме id и картинок
+     *
+     * @param person данные человека (id и картинки не учитываются)
+     * @return true, если человек существует, false в противном случае,
+     * null - в случае ошибки
+     */
+    public Boolean isPersonExist(@NonNull Person person) {
+        String SQL = "SELECT " + id + " FROM " + getTableName() +
+                " WHERE " +
+                name + "=" + getFieldWithQuote(person.getName()) + " AND " +
+                company + "=" + getFieldWithQuote(person.getCompany()) + " AND " +
+                role + "=" + getFieldWithQuote(person.getRole()) + " AND " +
+                description + "=" + getFieldWithQuote(person.getDescription()) + ";";
+        try (Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(SQL);
+            return (resultSet.next());
+        } catch (SQLException e) {
+            printSQLError(SQL, e);
+            return null;
         }
     }
 

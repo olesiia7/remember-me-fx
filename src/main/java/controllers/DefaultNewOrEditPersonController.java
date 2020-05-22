@@ -3,11 +3,13 @@ package controllers;
 import entities.Person;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.geometry.VPos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
@@ -18,6 +20,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -25,6 +28,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
 import utils.KeepDataHelper;
 
 import javax.imageio.ImageIO;
@@ -40,6 +44,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static javafx.embed.swing.SwingFXUtils.fromFXImage;
 import static utils.AlertUtils.showErrorAlert;
 import static utils.FileUtils.getPictureFromClipboard;
@@ -262,5 +267,28 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
             color = greyColor;
         }
         field.setStyle("-fx-border-color: #" + color);
+    }
+
+    /**
+     * Показывает в отдельном окне пользователя с таким же именем
+     *
+     * @param person дубликат человека с тем же ФИО
+     */
+    public void showDuplicatePerson(Person person) {
+        FXMLLoader loader = new FXMLLoader();
+        WatchDuplicatePersonController controller = new WatchDuplicatePersonController(person, dataHelper);
+        loader.setController(controller);
+        try {
+            Pane content = loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml")
+                    .toURI().toURL().openStream()));
+            Stage stage = new Stage();
+            Scene scene = new Scene(content);
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.setTitle("Существующий дубликат человека");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

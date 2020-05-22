@@ -5,9 +5,7 @@ import javafx.scene.control.ButtonType;
 
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.Alert.AlertType.INFORMATION;
-import static javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE;
-import static javafx.scene.control.ButtonBar.ButtonData.NO;
-import static javafx.scene.control.ButtonBar.ButtonData.YES;
+import static javafx.scene.control.ButtonBar.ButtonData.OTHER;
 
 /**
  * Класс с инструментами для создания аллеров
@@ -47,13 +45,24 @@ public class AlertUtils {
      * @return алерт
      */
     public static Alert createConfirmationAlert(String text) {
+        return createCustomAlert(text, "Да", "Нет", "Отменить");
+    }
+
+    /**
+     * Создает кастомный аллерт с множественным выбором
+     *
+     * @param text        текст вопроса
+     * @param buttonTexts тексты кнопок
+     * @return алерт
+     */
+    public static Alert createCustomAlert(String text, String... buttonTexts) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
         alert.setContentText(text);
-        ButtonType okButton = new ButtonType("Да", YES);
-        ButtonType noButton = new ButtonType("Нет", NO);
-        ButtonType cancelButton = new ButtonType("Отменить", CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(okButton, noButton, cancelButton);
+        alert.getButtonTypes().clear();
+        for (String buttonText : buttonTexts) {
+            alert.getButtonTypes().add(new ButtonType(buttonText, OTHER));
+        }
         return alert;
     }
 }

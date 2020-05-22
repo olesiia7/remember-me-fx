@@ -77,8 +77,7 @@ public class EditEventsTabController {
         eventNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
         eventsCountColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getParticipantsCount()));
 
-        Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>> cellFactory
-                = new Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>>() {
+        Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>> cellFactory = new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EventInfo, String> param) {
                 return new TableCell<EventInfo, String>() {
@@ -108,8 +107,7 @@ public class EditEventsTabController {
         };
         eventEditColumn.setCellFactory(cellFactory);
 
-        Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>> deleteCellFactory
-                = new Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>>() {
+        Callback<TableColumn<EventInfo, String>, TableCell<EventInfo, String>> deleteCellFactory = new Callback<>() {
             @Override
             public TableCell call(final TableColumn<EventInfo, String> param) {
                 return new TableCell<EventInfo, String>() {
