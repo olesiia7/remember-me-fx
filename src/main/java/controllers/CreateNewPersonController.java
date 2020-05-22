@@ -10,7 +10,6 @@ import utils.KeepDataHelper;
 
 import java.awt.*;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static utils.AlertUtils.showErrorAlert;
@@ -77,8 +76,6 @@ public class CreateNewPersonController extends DefaultNewOrEditPersonController 
                 fileInputStream.close();
                 VBox imageLayout = getImageLayout(image);
                 imageHBox.getChildren().addAll(imageLayout);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }

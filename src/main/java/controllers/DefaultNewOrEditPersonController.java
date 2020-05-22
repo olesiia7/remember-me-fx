@@ -162,7 +162,6 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
      */
     public List<String> saveImagesToComputer() {
         List<String> paths = new ArrayList<>();
-        String uuid = UUID.randomUUID().toString();
         File filePath = new File(dataHelper.getDataPath());
         //noinspection ResultOfMethodCallIgnored
         filePath.mkdir();
@@ -174,6 +173,7 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
                 })
                 .collect(Collectors.toList());
         for (Image image : chosenImages) {
+            String uuid = UUID.randomUUID().toString();
             String fileName = uuid + ".png";
             File file = new File(filePath + "\\" + fileName);
             try {
