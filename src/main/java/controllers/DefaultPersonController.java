@@ -31,6 +31,7 @@ import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
 public abstract class DefaultPersonController {
     public GridPane gridPane;
     KeepDataHelper dataHelper;
+    Image logo;
 
     public TextField name;
     public TextField events;
@@ -41,8 +42,9 @@ public abstract class DefaultPersonController {
 
     public boolean picturesChanged = false;
 
-    public DefaultPersonController(KeepDataHelper dataHelper) {
+    public DefaultPersonController(KeepDataHelper dataHelper, Image logo) {
         this.dataHelper = dataHelper;
+        this.logo = logo;
     }
 
     @FXML

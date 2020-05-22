@@ -5,6 +5,7 @@ import entities.EventInfo;
 import entities.Person;
 import entities.PersonWithSelected;
 import javafx.fxml.FXML;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import listeners.EventsUpdatedListener;
 import utils.KeepDataHelper;
@@ -17,8 +18,8 @@ import static utils.AlertUtils.showInformationAlert;
 
 public class AddEventParticipantsController extends DefaultEventController {
 
-    public AddEventParticipantsController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage) {
-        super(dataHelper, eventInfo, ownStage);
+    public AddEventParticipantsController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage, Image logo) {
+        super(dataHelper, eventInfo, ownStage, logo);
     }
 
     @Override

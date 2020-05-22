@@ -1,11 +1,12 @@
 package layoutWindow;
 
 import controllers.CreateNewPersonController;
-import listeners.NewPersonListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import listeners.NewPersonListener;
 import utils.KeepDataHelper;
 
 import java.awt.*;
@@ -19,9 +20,9 @@ import static java.util.Objects.requireNonNull;
 public class CreatePersonWindow {
     private NewPersonListener listener;
 
-    public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
+    public CreatePersonWindow(KeepDataHelper dataHelper, Stage ownerStage, Image logo) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
-        CreateNewPersonController controller = new CreateNewPersonController(dataHelper);
+        CreateNewPersonController controller = new CreateNewPersonController(dataHelper, logo);
         loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/NewPerson.fxml").toURI().toURL()).openStream());
         controller.setDataHelper(dataHelper);
@@ -41,6 +42,7 @@ public class CreatePersonWindow {
         stage.setMinWidth(content.getPrefWidth());
         stage.setMinHeight(content.getPrefHeight());
         stage.setTitle("Добавление нового человека");
+        stage.getIcons().add(logo);
         stage.show();
     }
 

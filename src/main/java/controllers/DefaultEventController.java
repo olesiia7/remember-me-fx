@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import listeners.EventsUpdatedListener;
@@ -46,13 +47,15 @@ public abstract class DefaultEventController {
     protected final EventInfo eventInfo;
     protected final KeepDataHelper dataHelper;
     protected final Stage ownStage;
+    protected final Image logo;
     protected EventsUpdatedListener listener;
     protected final ObservableList<PersonWithSelected> peopleData = FXCollections.observableArrayList();
 
-    public DefaultEventController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage) {
+    public DefaultEventController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage, Image logo) {
         this.dataHelper = dataHelper;
         this.eventInfo = eventInfo;
         this.ownStage = ownStage;
+        this.logo = logo;
     }
 
     @FXML

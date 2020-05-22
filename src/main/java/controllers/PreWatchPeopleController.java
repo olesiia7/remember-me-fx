@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import layoutWindow.WatchDataWindow;
@@ -21,6 +22,7 @@ import static utils.AlertUtils.showInformationAlert;
 
 public class PreWatchPeopleController {
     private final KeepDataHelper dataHelper;
+    private final Image logo;
     @FXML
     private TextField watchTimeMs;
     @FXML
@@ -31,8 +33,9 @@ public class PreWatchPeopleController {
     private CheckComboBox<String> eventsFilter;
     private CheckComboBox<String> companiesFilter;
 
-    public PreWatchPeopleController(KeepDataHelper dataHelper) {
+    public PreWatchPeopleController(KeepDataHelper dataHelper, Image logo) {
         this.dataHelper = dataHelper;
+        this.logo = logo;
     }
 
     @FXML
@@ -76,7 +79,7 @@ public class PreWatchPeopleController {
             showInformationAlert("Переход к просмотру",
                     "Приготовьтесь к просмотру! Вам будут показаны " + people.size() + " человек(а)");
             getStage().close();
-            new WatchDataWindow(dataHelper, getStage(), watchTimeMsValue, people);
+            new WatchDataWindow(dataHelper, getStage(), watchTimeMsValue, people, logo);
         }
     }
 

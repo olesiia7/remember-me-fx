@@ -22,6 +22,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -47,6 +48,7 @@ import static utils.AlertUtils.showErrorAlert;
 public class EditEventsTabController {
     private final Stage stage;
     private final KeepDataHelper dataHelper;
+    private final Image logo;
 
     public TabPane tabPanel;
     private TableView<EventInfoWithSelected> tableEvents;
@@ -54,10 +56,11 @@ public class EditEventsTabController {
 
     private final ObservableList<EventInfoWithSelected> eventsData = FXCollections.observableArrayList();
 
-    public EditEventsTabController(Stage stage, KeepDataHelper dataHelper)
+    public EditEventsTabController(Stage stage, KeepDataHelper dataHelper, Image logo)
     {
         this.stage = stage;
         this.dataHelper = dataHelper;
+        this.logo = logo;
     }
 
     protected void initialize(TabPane tabPanel,
@@ -93,7 +96,7 @@ public class EditEventsTabController {
                                 EventInfo eventInfo = getTableView().getItems().get(getIndex());
                                 System.out.println(eventInfo);
                                 try {
-                                    EditEventWindow editEventInfoWindow = new EditEventWindow(dataHelper, stage, eventInfo);
+                                    EditEventWindow editEventInfoWindow = new EditEventWindow(dataHelper, stage, eventInfo, logo);
                                     editEventInfoWindow.addListener(EditEventsTabController.this::refreshData);
                                 } catch (IOException e) {
                                     e.printStackTrace();
@@ -184,7 +187,7 @@ public class EditEventsTabController {
             int newEventId = dataHelper.createEventAndGetId(name);
             EventInfo eventInfo = new EventInfo(newEventId, name, 0);
             try {
-                EditEventWindow editEventWindow = new EditEventWindow(dataHelper, stage, eventInfo);
+                EditEventWindow editEventWindow = new EditEventWindow(dataHelper, stage, eventInfo, logo);
                 // обновляем таблицу при новом пользователе
                 editEventWindow.addListener(EditEventsTabController.this::refreshData);
             } catch (IOException e) {

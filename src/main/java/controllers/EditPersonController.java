@@ -5,6 +5,7 @@ import entities.PersonDif;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.image.Image;
 import listeners.PersonUpdatedListener;
 import utils.KeepDataHelper;
 
@@ -24,8 +25,8 @@ public class EditPersonController extends DefaultNewOrEditPersonController {
     private final Person person;
     private PersonUpdatedListener listener;
 
-    public EditPersonController(KeepDataHelper dataHelper, Person person) {
-        super(dataHelper);
+    public EditPersonController(KeepDataHelper dataHelper, Person person, Image logo) {
+        super(dataHelper, logo);
         this.person = person;
     }
 

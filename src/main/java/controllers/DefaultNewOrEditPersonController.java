@@ -59,8 +59,8 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
     private static final String greenColor = Paint.valueOf(Integer.toHexString(Color.GREEN.hashCode())).toString().substring(2);
     private static final String greyColor = Paint.valueOf(Integer.toHexString(Color.GREY.hashCode())).toString().substring(2);
 
-    public DefaultNewOrEditPersonController(KeepDataHelper dataHelper) {
-        super(dataHelper);
+    public DefaultNewOrEditPersonController(KeepDataHelper dataHelper, Image logo) {
+        super(dataHelper, logo);
     }
 
     /**
@@ -276,7 +276,7 @@ public abstract class DefaultNewOrEditPersonController extends DefaultPersonCont
      */
     public void showDuplicatePerson(Person person) {
         FXMLLoader loader = new FXMLLoader();
-        WatchDuplicatePersonController controller = new WatchDuplicatePersonController(person, dataHelper);
+        WatchDuplicatePersonController controller = new WatchDuplicatePersonController(person, dataHelper, logo);
         loader.setController(controller);
         try {
             Pane content = loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml")

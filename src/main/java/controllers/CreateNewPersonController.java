@@ -20,8 +20,8 @@ import static utils.AlertUtils.showErrorAlert;
 public class CreateNewPersonController extends DefaultNewOrEditPersonController {
     public NewPersonListener listener;
 
-    public CreateNewPersonController(KeepDataHelper dataHelper) {
-        super(dataHelper);
+    public CreateNewPersonController(KeepDataHelper dataHelper, Image logo) {
+        super(dataHelper, logo);
     }
 
     @Override

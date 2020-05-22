@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -48,8 +49,8 @@ public class EditEventController extends DefaultEventController {
     @FXML
     private TextField partCount;
 
-    public EditEventController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage) {
-        super(dataHelper, eventInfo, ownStage);
+    public EditEventController(KeepDataHelper dataHelper, EventInfo eventInfo, Stage ownStage, Image logo) {
+        super(dataHelper, eventInfo, ownStage, logo);
     }
 
     @Override
@@ -291,7 +292,7 @@ public class EditEventController extends DefaultEventController {
     @FXML
     private void addParticipants() {
         try {
-            AddEventParticipantsWindow addEventParticipantsWindow = new AddEventParticipantsWindow(dataHelper, ownStage, eventInfo);
+            AddEventParticipantsWindow addEventParticipantsWindow = new AddEventParticipantsWindow(dataHelper, ownStage, eventInfo, logo);
             addEventParticipantsWindow.addListener(() -> this.refreshData(true));
         } catch (IOException e) {
             e.printStackTrace();

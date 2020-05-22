@@ -9,6 +9,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -60,9 +61,9 @@ public class EditDataController {
     @FXML
     private TableColumn<EventInfo, String> eventDeleteColumn;
 
-    public EditDataController(KeepDataHelper dataHelper, Stage stage) {
-        peopleTab = new EditPeopleTabController(stage, dataHelper);
-        eventsTab = new EditEventsTabController(stage, dataHelper);
+    public EditDataController(KeepDataHelper dataHelper, Stage stage, Image logo) {
+        peopleTab = new EditPeopleTabController(stage, dataHelper, logo);
+        eventsTab = new EditEventsTabController(stage, dataHelper, logo);
     }
 
     // инициализируем форму данными

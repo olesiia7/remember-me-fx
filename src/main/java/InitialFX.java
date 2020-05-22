@@ -17,6 +17,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -30,6 +31,7 @@ import utils.KeepDataHelper;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,7 @@ import static utils.FileUtils.deleteUnusedFiles;
 
 public class InitialFX extends Application {
     public static KeepDataHelper dataHelper;
+    public static Image logo;
 
     public static void main(String[] args) throws Exception {
         File recoursePath = new File("src/main/java/resources");
@@ -56,6 +59,7 @@ public class InitialFX extends Application {
             dataHelper.setDataPathSetting(dataHelper.getDataPath());
         }
         deleteUnusedFiles(dataHelper.getAllPictures(), dataHelper.getDataPath());
+        logo = new Image(new FileInputStream("src/main/java/logo.png"));
         Application.launch();
     }
 
@@ -68,13 +72,13 @@ public class InitialFX extends Application {
         Button startGrabberButton = new Button("Граббер");
         startGrabberButton.setMaxWidth(Double.MAX_VALUE);
         startGrabberButton.setOnAction(actionEvent -> {
-            startGrabberWindow(stage);
+            startGrabberWindow();
         });
         Button addNewPersonButton = new Button("Добавить человека");
         addNewPersonButton.setMaxWidth(Double.MAX_VALUE);
         addNewPersonButton.setOnAction(actionEvent -> {
             try {
-                new CreatePersonWindow(dataHelper, stage);
+                new CreatePersonWindow(dataHelper, stage, logo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -83,7 +87,7 @@ public class InitialFX extends Application {
         editDataButton.setMaxWidth(Double.MAX_VALUE);
         editDataButton.setOnAction(actionEvent -> {
             try {
-                new EditDataWindow(dataHelper, stage);
+                new EditDataWindow(dataHelper, stage, logo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -92,7 +96,7 @@ public class InitialFX extends Application {
         watchDataButton.setMaxWidth(Double.MAX_VALUE);
         watchDataButton.setOnAction(actionEvent -> {
             try {
-                new PreWatchDataWindow(dataHelper, stage);
+                new PreWatchDataWindow(dataHelper, stage, logo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -106,7 +110,7 @@ public class InitialFX extends Application {
         settingsButton.setMaxWidth(Double.MAX_VALUE);
         settingsButton.setOnAction(actionEvent -> {
             try {
-                new SettingsWindow(dataHelper, stage);
+                new SettingsWindow(dataHelper, stage, logo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -115,11 +119,14 @@ public class InitialFX extends Application {
         Scene scene = new Scene(vBox);
         stage.setTitle("Remember me");
         stage.setScene(scene);
+        stage.setMinWidth(280);
+        stage.getIcons().add(logo);
         stage.show();
     }
 
-    private void startGrabberWindow(Stage parentStage) {
+    private void startGrabberWindow() {
         Stage stage = new Stage();
+        stage.getIcons().add(logo);
         VBox vBox = new VBox();
         vBox.setSpacing(5);
         vBox.setPadding(new Insets(5));
@@ -152,7 +159,7 @@ public class InitialFX extends Application {
             EventInfo eventInfo = new EventInfo(eventId, eventName, people.size());
             try {
                 stage.close();
-                EditParsedEventWindow editParsedEventWindow = new EditParsedEventWindow(dataHelper, stage, eventInfo, people);
+                EditParsedEventWindow editParsedEventWindow = new EditParsedEventWindow(dataHelper, stage, eventInfo, people, logo);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -166,6 +173,7 @@ public class InitialFX extends Application {
     private void createPreControlWindow(Stage parentStage) {
         Stage stage = new Stage();
         stage.setTitle("Настройка режима проверки");
+        stage.getIcons().add(logo);
         stage.initOwner(parentStage);
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(5));
@@ -282,7 +290,8 @@ public class InitialFX extends Application {
     private void startControl(List<Person> peopleToShow, int newAnswerTimeMs) {
         FXMLLoader loader = new FXMLLoader();
         Stage stage = new Stage();
-        ControlPeopleController controller = new ControlPeopleController(dataHelper, peopleToShow, newAnswerTimeMs, stage);
+        stage.getIcons().add(logo);
+        ControlPeopleController controller = new ControlPeopleController(dataHelper, peopleToShow, newAnswerTimeMs, stage, logo);
         loader.setController(controller);
         try {
             loader.load(requireNonNull(new File("src/main/layouts/DefaultPersonView.fxml").toURI().toURL()).openStream());

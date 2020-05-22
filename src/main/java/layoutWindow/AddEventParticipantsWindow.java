@@ -4,6 +4,7 @@ import controllers.AddEventParticipantsController;
 import entities.EventInfo;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import listeners.PersonUpdatedListener;
@@ -18,11 +19,11 @@ import static java.util.Objects.requireNonNull;
 public class AddEventParticipantsWindow {
     private PersonUpdatedListener listener;
 
-    public AddEventParticipantsWindow(KeepDataHelper dataHelper, Stage ownerStage, EventInfo eventInfo) throws HeadlessException, IOException {
+    public AddEventParticipantsWindow(KeepDataHelper dataHelper, Stage ownerStage, EventInfo eventInfo, Image logo) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
         Stage stage = new Stage();
         stage.initOwner(ownerStage);
-        AddEventParticipantsController controller = new AddEventParticipantsController(dataHelper, eventInfo, stage);
+        AddEventParticipantsController controller = new AddEventParticipantsController(dataHelper, eventInfo, stage, logo);
         loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/AddParticipantsToEvent.fxml").toURI().toURL()).openStream());
         controller.addListener(() -> {
@@ -35,6 +36,7 @@ public class AddEventParticipantsWindow {
         stage.setMinWidth(content.getPrefWidth());
         stage.setMinHeight(content.getPrefHeight());
         stage.setTitle("Добавление новых людей в мероприятие " + eventInfo.getName());
+        stage.getIcons().add(logo);
         stage.show();
     }
 

@@ -2,14 +2,15 @@ package controllers;
 
 import entities.Person;
 import javafx.fxml.FXML;
+import javafx.scene.image.Image;
 import utils.KeepDataHelper;
 
 public class WatchDuplicatePersonController extends DefaultPersonController {
     private final Person person;
 
 
-    public WatchDuplicatePersonController(Person person, KeepDataHelper dataHelper) {
-        super(dataHelper);
+    public WatchDuplicatePersonController(Person person, KeepDataHelper dataHelper, Image logo) {
+        super(dataHelper, logo);
         this.person = person;
     }
 

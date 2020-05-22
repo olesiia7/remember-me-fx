@@ -3,6 +3,7 @@ package layoutWindow;
 import controllers.PreWatchPeopleController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
@@ -14,9 +15,9 @@ import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 
 public class PreWatchDataWindow {
-    public PreWatchDataWindow(KeepDataHelper dataHelper, Stage ownerStage) throws HeadlessException, IOException {
+    public PreWatchDataWindow(KeepDataHelper dataHelper, Stage ownerStage, Image logo) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
-        PreWatchPeopleController controller = new PreWatchPeopleController(dataHelper);
+        PreWatchPeopleController controller = new PreWatchPeopleController(dataHelper, logo);
         loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/PreWatchPerson.fxml").toURI().toURL().openStream()));
 
@@ -26,6 +27,7 @@ public class PreWatchDataWindow {
         stage.setScene(scene);
         stage.setResizable(true);
         stage.setTitle("Настройка режима просмотра");
+        stage.getIcons().add(logo);
         stage.show();
     }
 }

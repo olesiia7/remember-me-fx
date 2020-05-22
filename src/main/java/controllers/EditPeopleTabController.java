@@ -12,6 +12,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -32,6 +33,7 @@ import static entities.DefaultPeopleTable.fillDefaultFields;
 public class EditPeopleTabController {
     private final Stage stage;
     private final KeepDataHelper dataHelper;
+    private final Image logo;
 
     public TabPane tabPanel;
 
@@ -42,10 +44,11 @@ public class EditPeopleTabController {
     private CheckComboBox<String> eventsFilter;
     private CheckComboBox<String> companiesFilter;
 
-    public EditPeopleTabController(Stage stage, KeepDataHelper dataHelper)
+    public EditPeopleTabController(Stage stage, KeepDataHelper dataHelper, Image logo)
     {
         this.stage = stage;
         this.dataHelper = dataHelper;
+        this.logo = logo;
     }
 
     protected void initialize(TabPane tabPanel,
@@ -85,7 +88,7 @@ public class EditPeopleTabController {
                                 Person person = getTableView().getItems().get(getIndex());
                                 System.out.println(person);
                                 try {
-                                    EditPersonWindow editPersonWindow = new EditPersonWindow(dataHelper, stage, person);
+                                    EditPersonWindow editPersonWindow = new EditPersonWindow(dataHelper, stage, person, logo);
                                     editPersonWindow.addListener(EditPeopleTabController.this::refreshData);
                                 } catch (IOException e) {
                                     e.printStackTrace();
@@ -218,7 +221,7 @@ public class EditPeopleTabController {
      */
     public void addNewPerson() {
         try {
-            CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, stage);
+            CreatePersonWindow createPersonWindow = new CreatePersonWindow(dataHelper, stage, logo);
             // обновляем таблицу при новом пользователе
             createPersonWindow.addListener(this::refreshData);
         } catch (IOException e) {

@@ -5,6 +5,7 @@ import entities.EventInfo;
 import entities.Person;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import listeners.PersonUpdatedListener;
@@ -20,12 +21,12 @@ import static java.util.Objects.requireNonNull;
 public class EditParsedEventWindow {
     private PersonUpdatedListener listener;
 
-    public EditParsedEventWindow(KeepDataHelper dataHelper, Stage ownerStage, EventInfo eventInfo, List<Person> people) throws HeadlessException, IOException {
+    public EditParsedEventWindow(KeepDataHelper dataHelper, Stage ownerStage, EventInfo eventInfo, List<Person> people, Image logo) throws HeadlessException, IOException {
         FXMLLoader loader = new FXMLLoader();
         Stage stage = new Stage();
         stage.initOwner(ownerStage);
         dataHelper.savePeople(people);
-        EditEventController controller = new EditEventController(dataHelper, eventInfo, stage);
+        EditEventController controller = new EditEventController(dataHelper, eventInfo, stage, logo);
         loader.setController(controller);
         Pane content = loader.load(requireNonNull(new File("src/main/layouts/EditEvent.fxml").toURI().toURL()).openStream());
         controller.addListener(() -> {
@@ -38,6 +39,7 @@ public class EditParsedEventWindow {
         stage.setMinWidth(content.getPrefWidth());
         stage.setMinHeight(content.getPrefHeight());
         stage.setTitle("Редактирование мероприятия");
+        stage.getIcons().add(logo);
         stage.show();
     }
 

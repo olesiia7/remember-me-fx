@@ -4,6 +4,7 @@ import entities.SettingsProfile;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
@@ -15,6 +16,7 @@ import static utils.FileUtils.moveFiles;
 
 public class SettingsController {
     private final KeepDataHelper dataHelper;
+    private final Image logo;
     @FXML
     public TextField dirPath;
     private DirectoryChooser directoryChooser;
@@ -28,8 +30,9 @@ public class SettingsController {
     @FXML
     private Button saveButton;
 
-    public SettingsController(KeepDataHelper dataHelper, Stage stage) {
+    public SettingsController(KeepDataHelper dataHelper, Stage stage, Image logo) {
         this.dataHelper = dataHelper;
+        this.logo = logo;
     }
 
     @FXML

@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import utils.KeepDataHelper;
@@ -29,8 +30,8 @@ public class ControlPeopleController extends DefaultPersonController {
     private Button mistakeButton;
     private Scene scene;
 
-    public ControlPeopleController(KeepDataHelper dataHelper, List<Person> people, int answerTimeInMs, Stage stage) {
-        super(dataHelper);
+    public ControlPeopleController(KeepDataHelper dataHelper, List<Person> people, int answerTimeInMs, Stage stage, Image logo) {
+        super(dataHelper, logo);
         this.people = people;
         this.answerTimeInMs = answerTimeInMs;
         this.stage = stage;

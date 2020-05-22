@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import utils.KeepDataHelper;
 
@@ -20,8 +21,8 @@ public class WatchPeopleController extends DefaultPersonController {
     private Timer timer;
 
 
-    public WatchPeopleController(KeepDataHelper dataHelper, int watchTimeMs, List<Person> people) {
-        super(dataHelper);
+    public WatchPeopleController(KeepDataHelper dataHelper, int watchTimeMs, List<Person> people, Image logo) {
+        super(dataHelper, logo);
         this.watchTimeMs = watchTimeMs;
         this.people = people;
     }
