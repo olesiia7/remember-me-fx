@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,6 +176,20 @@ public class Events implements Table {
     public void deleteEvent(int eventId) {
         String SQL = "DELETE FROM " + getTableName() +
                 " WHERE " + id + "=" + eventId + ";";
+        executeSQL(conn, SQL);
+    }
+
+    /**
+     * @param eventIds id мероприйтий, которые нужно удалить
+     */
+    public void deleteEvents(Set<Integer> eventIds) {
+        Iterator<Integer> iterator = eventIds.iterator();
+        StringBuilder ids = new StringBuilder(iterator.next().toString());
+        while (iterator.hasNext()) {
+            ids.append(",").append(iterator.next());
+        }
+        String SQL = "DELETE FROM " + getTableName() +
+                " WHERE " + id + "in(" + ids + ");";
         executeSQL(conn, SQL);
     }
 

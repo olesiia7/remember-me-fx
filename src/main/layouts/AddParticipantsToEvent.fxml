@@ -13,9 +13,6 @@
       <BorderPane>
          <right>
             <HBox spacing="5.0" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
                <children>
                   <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#saveNewParticipants" text="Сохранить" />
                   <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#cancel" text="Отменить" />

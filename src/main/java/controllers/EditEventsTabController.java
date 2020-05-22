@@ -1,18 +1,29 @@
 package controllers;
 
 import entities.EventInfo;
+import entities.EventInfoWithSelected;
 import entities.Person;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import layoutWindow.EditEventWindow;
@@ -22,9 +33,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.EMPTY_LIST;
@@ -36,9 +49,10 @@ public class EditEventsTabController {
     private final KeepDataHelper dataHelper;
 
     public TabPane tabPanel;
-    private TableView<EventInfo> tableEvents;
+    private TableView<EventInfoWithSelected> tableEvents;
+    private TableColumn<EventInfoWithSelected, CheckBox> selectedColumn;
 
-    private final ObservableList<EventInfo> eventsData = FXCollections.observableArrayList();
+    private final ObservableList<EventInfoWithSelected> eventsData = FXCollections.observableArrayList();
 
     public EditEventsTabController(Stage stage, KeepDataHelper dataHelper)
     {
@@ -48,7 +62,8 @@ public class EditEventsTabController {
 
     protected void initialize(TabPane tabPanel,
                               Tab editEventsTab,
-                              TableView<EventInfo> tableEvents,
+                              TableView<EventInfoWithSelected> tableEvents,
+                              TableColumn<EventInfoWithSelected, CheckBox> selectedColumn,
                               TableColumn<EventInfo, String> eventNameColumn,
                               TableColumn<EventInfo, String> eventsCountColumn,
                               TableColumn<EventInfo, String> eventEditColumn,
@@ -56,6 +71,7 @@ public class EditEventsTabController {
     {
         this.tabPanel = tabPanel;
         this.tableEvents = tableEvents;
+        this.selectedColumn = selectedColumn;
 
         // устанавливаем тип и значение которое должно хранится в колонке
         eventNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
@@ -132,6 +148,7 @@ public class EditEventsTabController {
             }
         };
         eventDeleteColumn.setCellFactory(deleteCellFactory);
+        fillCheckBoxColumn(selectedColumn, eventsData);
         // обновляем при переключении на вкладку
         editEventsTab.setOnSelectionChanged(event -> {
             if (editEventsTab.isSelected()) {
@@ -145,7 +162,7 @@ public class EditEventsTabController {
      *
      * @param events список событий
      */
-    public void setDataToTable(List<EventInfo> events) {
+    public void setDataToTable(List<EventInfoWithSelected> events) {
         eventsData.clear();
         eventsData.addAll(events);
         tableEvents.setItems(eventsData);
@@ -180,13 +197,147 @@ public class EditEventsTabController {
 
     private void refreshData() {
         Map<Integer, String> allEvents = dataHelper.getAllEvents();
-        List<EventInfo> eventInfos = new ArrayList<>();
+        List<EventInfoWithSelected> eventInfos = new ArrayList<>();
         allEvents.keySet().forEach(eventId -> {
             int participantCount = dataHelper.getCountEventsByEventId(eventId);
-            eventInfos.add(new EventInfo(eventId, allEvents.get(eventId), participantCount));
+            Optional<EventInfoWithSelected> optional = eventsData.stream()
+                    .filter(event -> event.getId() == eventId)
+                    .findFirst();
+            boolean selected = false;
+            if (optional.isPresent()) {
+                selected = optional.get().isSelected();
+            }
+            eventInfos.add(new EventInfoWithSelected(selected, new EventInfo(eventId, allEvents.get(eventId), participantCount)));
         });
         setDataToTable(eventInfos);
         tableEvents.getItems().sort(Comparator.comparing(EventInfo::getName));
         tabPanel.requestLayout();
+    }
+
+    /**
+     * Заполняет колонку CheckBox, при нажатии отмечает в EventInfoWithSelected соответствующее значение
+     *
+     * @param selectedColumn столбец с CheckBox
+     * @param peopleData     сохраненные данные
+     */
+    public static void fillCheckBoxColumn(TableColumn<EventInfoWithSelected, CheckBox> selectedColumn,
+                                          ObservableList<EventInfoWithSelected> peopleData)
+    {
+        selectedColumn.setCellValueFactory(data -> {
+            EventInfoWithSelected curEvent = data.getValue();
+            CheckBox checkBox = new CheckBox();
+            checkBox.selectedProperty().setValue(curEvent.isSelected());
+            checkBox.selectedProperty().addListener((ov, old_val, new_val) -> peopleData.stream()
+                    .filter(event -> event.getId() == curEvent.getId())
+                    .forEach(event -> event.setSelected(new_val)));
+            return new SimpleObjectProperty<>(checkBox);
+        });
+    }
+
+    public void joinEvents() {
+        // разделяем мероприятия на выбранные и нет
+        Set<Integer> chosenEvents = new HashSet<>();
+        ObservableList<String> otherEvents = FXCollections.observableArrayList();
+        eventsData.forEach(eventWithSelection -> {
+            if (eventWithSelection.isSelected()) {
+                chosenEvents.add(eventWithSelection.getEventInfo().getId());
+            } else {
+                otherEvents.add(eventWithSelection.getEventInfo().getName());
+            }
+        });
+        if (chosenEvents.size() == 0) {
+            showErrorAlert("Вы не выбрали ни одного мероприятия для перемещения");
+            return;
+        }
+        otherEvents.sorted();
+        Stage stage = new Stage();
+        stage.setTitle("Выберите параметры переноса");
+        VBox vBox = new VBox();
+        vBox.setSpacing(5);
+        vBox.setPadding(new Insets(5));
+        String information = "Вы выбрали " + chosenEvents.size() + " мероприятий. \n" +
+                "Пожалуйста, выберите, в какую групу вы хотите их переместить";
+        Label chooseWhereToJoinLabel = new Label(information);
+        Label moveToExist = new Label("Переместить в существующее мероприятие: ");
+
+        ListView<String> choseOtherEvents = new ListView(otherEvents);
+        choseOtherEvents.setPrefHeight(70);
+        CheckBox moveToNewGroup = new CheckBox("Создать новую группу");
+        TextField newEventName = new TextField();
+        newEventName.setEditable(false);
+        moveToNewGroup.setOnAction(event -> {
+            if (moveToNewGroup.isSelected()) {
+                choseOtherEvents.setDisable(true);
+                newEventName.setEditable(true);
+            } else {
+                choseOtherEvents.setDisable(false);
+                newEventName.clear();
+                newEventName.setEditable(false);
+            }
+        });
+        CheckBox leaveThisGroup = new CheckBox("Оставить людей в этой группе");
+        CheckBox deleteThisGroup = new CheckBox("Удалить выбранную группу после переноса");
+
+        HBox buttons = new HBox();
+        buttons.setSpacing(5);
+        buttons.setAlignment(Pos.TOP_RIGHT);
+        Button moveButton = new Button("Переместить");
+        moveButton.setOnAction(action -> {
+            String name;
+            if (moveToNewGroup.isSelected()) {
+                name = newEventName.getText();
+                boolean eventNameAlreadyExist = eventsData.stream()
+                        .anyMatch(event -> event.getName().equals(name));
+                if (eventNameAlreadyExist) {
+                    showErrorAlert("Название нового мероприятие должно быть уникальным");
+                    return;
+                }
+            } else {
+                name = choseOtherEvents.getSelectionModel().getSelectedItem();
+            }
+            // получаем список людей из всех мероприятий
+            Set<Integer> allPeopleToMove = dataHelper.getPeopleWithEvents(chosenEvents);
+            if (allPeopleToMove.isEmpty()) {
+                showErrorAlert("В выбранных мероприятиях нет людей");
+                return;
+            }
+            // id мероприятия, куда будет идти перенос
+            int eventIdToMoveInto = dataHelper.createEventAndGetId(name);
+            // перемещаем людей в мероприятие
+            dataHelper.addPeopleToEvent(eventIdToMoveInto, allPeopleToMove);
+            // 4 если удалить мероприятие, то удалить
+            if (deleteThisGroup.isSelected()) {
+                dataHelper.deleteEvents(chosenEvents);
+                refreshData();
+                return;
+            }
+            // если не надо оставлять участников в группе, то убрать их
+            if (!leaveThisGroup.isSelected()) {
+                dataHelper.deleteEventsParticipants(chosenEvents);
+                refreshData();
+            }
+        });
+        Button cancelButton = new Button("Отменить");
+        cancelButton.setOnAction(action -> {
+            stage.close();
+        });
+        buttons.getChildren().addAll(moveButton, cancelButton);
+
+        vBox.getChildren().addAll(chooseWhereToJoinLabel, moveToExist, choseOtherEvents, moveToNewGroup, newEventName,
+                leaveThisGroup, deleteThisGroup, buttons);
+
+        Scene scene = new Scene(vBox);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    void unselectAll() {
+        eventsData.forEach(person -> person.setSelected(false));
+        refreshData();
+    }
+
+    void selectAll() {
+        eventsData.forEach(person -> person.setSelected(true));
+        refreshData();
     }
 }

@@ -1,8 +1,10 @@
 package controllers;
 
 import entities.EventInfo;
+import entities.EventInfoWithSelected;
 import entities.Person;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -46,7 +48,9 @@ public class EditDataController {
     @FXML
     private Tab editEventsTab;
     @FXML
-    private TableView<EventInfo> tableEvents;
+    private TableView<EventInfoWithSelected> tableEvents;
+    @FXML
+    protected TableColumn<EventInfoWithSelected, CheckBox> selectedColumn;
     @FXML
     private TableColumn<EventInfo, String> eventNameColumn;
     @FXML
@@ -66,7 +70,7 @@ public class EditDataController {
     private void initialize() {
         peopleTab.initialize(tabPanel, editPeopleTab, filterPanel, tablePeople,
                 picColumn, nameColumn, eventsColumn, companyColumn, roleColumn, descriptionColumn, editColumn, deleteColumn);
-        eventsTab.initialize(tabPanel, editEventsTab, tableEvents, eventNameColumn, eventsCountColumn, eventEditColumn, eventDeleteColumn);
+        eventsTab.initialize(tabPanel, editEventsTab, tableEvents, selectedColumn, eventNameColumn, eventsCountColumn, eventEditColumn, eventDeleteColumn);
     }
 
     @FXML
@@ -77,5 +81,20 @@ public class EditDataController {
     @FXML
     public void createNewEvent() {
         eventsTab.createNewEvent();
+    }
+
+    @FXML
+    public void joinEvents() {
+        eventsTab.joinEvents();
+    }
+
+    @FXML
+    void unselectAll() {
+        eventsTab.unselectAll();
+    }
+
+    @FXML
+    void selectAll() {
+        eventsTab.selectAll();
     }
 }

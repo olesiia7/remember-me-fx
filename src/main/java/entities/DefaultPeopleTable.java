@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +47,6 @@ public abstract class DefaultPeopleTable {
                     imageView.setFitWidth(100);
                     imageView.setFitHeight(100);
                     return new SimpleObjectProperty<>(imageView);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -92,6 +92,44 @@ public class EventsAndPeople implements Table {
     }
 
     /**
+     * Добавляет в мероприятие указанных людей
+     *
+     * @param eventId   id мероприятия
+     * @param peopleIds список id людей, которых надо добавить в мероприятие
+     */
+    public void addPeopleToEvent(int eventId, Set<Integer> peopleIds) {
+        if (peopleIds.isEmpty()) {
+            return;
+        }
+        // оставляем только те события, которые уже есть
+        Set<Integer> notExistPeopleIds = new HashSet<>();
+        for (Integer personId : peopleIds) {
+            String SQL = "SELECT * FROM " + getTableName() +
+                    " WHERE " + eventIdField + "=" + eventId + " AND " + personIdField + "=" + personId + ";";
+            try (Statement statement = conn.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(SQL);
+                if (!resultSet.next()) {
+                    notExistPeopleIds.add(personId);
+                }
+            } catch (SQLException e) {
+                printSQLError(SQL, e);
+            }
+        }
+        // если все люди уже есть, ничего не надо
+        if (notExistPeopleIds.isEmpty()) {
+            return;
+        }
+        StringBuilder SQL = new StringBuilder().append("INSERT INTO ").append(getTableName()).append(" (").append(getFieldNames()).append(") ")
+                .append("VALUES ");
+        List<String> values = new ArrayList<>();
+        for (Integer notExistPersonId : notExistPeopleIds) {
+            values.add("(" + notExistPersonId + "," + eventId + ")");
+        }
+        SQL.append(String.join(",", values)).append(";");
+        executeSQL(conn, SQL.toString());
+    }
+
+    /**
      * @param personId id человека
      * @return список мероприятий человека
      */
@@ -111,6 +149,35 @@ public class EventsAndPeople implements Table {
             ResultSet resultSet = statement.executeQuery(SQLBuilder.toString());
             while (resultSet.next()) {
                 events.add(resultSet.getString(Events.name));
+            }
+        } catch (SQLException e) {
+            printSQLError(SQL, e);
+        }
+        return events;
+    }
+
+    /**
+     * Выбирает список людей, которые есть хотя бы в одном из указанных мероприятий
+     *
+     * @param eventsIds id мероприятий
+     * @return список людей, входящих в любое из выбранных мероприятий
+     */
+    public Set<Integer> getPeopleWithEvents(Set<Integer> eventsIds) {
+        Set<Integer> events = new HashSet<>();
+        StringBuilder SQLBuilder = new StringBuilder();
+        SQLBuilder.append("select distinct ").append(getPersonIdField())
+                .append(" from ").append(getTableName())
+                .append(" INNER JOIN ").append(eventsTable.getTableName()).append(" ON ")
+                .append(eventsTable.getId())
+                .append("=").append(getEventIdField())
+                .append(" where ")
+                .append(eventIdField).append(" in (");
+        SQLBuilder.append(eventsIds.stream().map(Object::toString).collect(Collectors.joining(","))).append(")");
+        String SQL = SQLBuilder.toString();
+        try (Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(SQLBuilder.toString());
+            while (resultSet.next()) {
+                events.add(resultSet.getInt(getPersonIdField()));
             }
         } catch (SQLException e) {
             printSQLError(SQL, e);
@@ -213,12 +280,24 @@ public class EventsAndPeople implements Table {
      * @param participants id людей, у которых надо удалить событие
      */
     public void deleteEventsFromPeople(int eventId, List<Integer> participants) {
-        String partIds = participants.stream()
+        String values = participants.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
         String SQL = "DELETE FROM " + getTableName() +
                 " WHERE " + eventIdField + "=" + eventId +
-                " AND " + personIdField + " in(" + partIds + ");";
+                " AND " + personIdField + " in(" + values + ");";
+        executeSQL(conn, SQL);
+    }
+
+    /**
+     * @param eventIds id мероприйтий, которые нужно удалить
+     */
+    public void deleteEventsParticipants(Set<Integer> eventIds) {
+        String values = eventIds.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+        String SQL = "DELETE FROM " + getTableName() +
+                " WHERE " + eventIdField + "in(" + values + ");";
         executeSQL(conn, SQL);
     }
 }

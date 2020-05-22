@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,10 @@ public class KeepDataHelper {
             person.setEvents(eventsAndPeopleTable.getPersonEvents(person.getId()));
         }
         return allPeople;
+    }
+
+    public Set<Integer> getPeopleWithEvents(Set<Integer> eventsIds) {
+        return eventsAndPeopleTable.getPeopleWithEvents(eventsIds);
     }
 
     public boolean isPersonWithNameExist(String name) {
@@ -195,6 +200,13 @@ public class KeepDataHelper {
     }
 
     /**
+     * @param eventIds id мероприйтий, которые нужно удалить
+     */
+    public void deleteEvents(Set<Integer> eventIds) {
+        eventsTable.deleteEvents(eventIds);
+    }
+
+    /**
      * Переименовывает мероприятие
      *
      * @param eventId      id события
@@ -212,6 +224,15 @@ public class KeepDataHelper {
      */
     public void deleteEventsFromPeople(int eventId, List<Integer> participants) {
         eventsAndPeopleTable.deleteEventsFromPeople(eventId, participants);
+    }
+
+    /**
+     * Удаляет участников из мероприятия
+     *
+     * @param eventIds id события, которое нужно удалить
+     */
+    public void deleteEventsParticipants(Set<Integer> eventIds) {
+        eventsAndPeopleTable.deleteEventsParticipants(eventIds);
     }
 
     /**
@@ -284,6 +305,10 @@ public class KeepDataHelper {
             e.printStackTrace();
         }
         return people;
+    }
+
+    public List<Person> getPeopleByCriteria(@NonNull List<String> events, @NonNull List<String> companies) {
+        return getPeopleByCriteria(events, companies, false);
     }
 
     /**
@@ -375,6 +400,28 @@ public class KeepDataHelper {
     }
 
     /**
+     * Добавляет в мероприятие указанных людей
+     *
+     * @param eventId   id мероприятия
+     * @param peopleIds список id людей, которых надо добавить в мероприятие
+     */
+    public void addPeopleToEvent(int eventId, Set<Integer> peopleIds) {
+        eventsAndPeopleTable.addPeopleToEvent(eventId, peopleIds);
+    }
+
+    /**
+     * Добавляет человека в указанные мероприятия
+     *
+     * @param personId id человека, которого нужно добавить в мероприятия
+     * @param eventId  id мероприятия
+     */
+    public void addEventsToPerson(int personId, Integer eventId) {
+        HashSet<Integer> eventsIds = new HashSet<>();
+        eventsIds.add(eventId);
+        eventsAndPeopleTable.addPersonEvents(personId, eventsIds);
+    }
+
+    /**
      * Перезаписывает данные пользователя
      *
      * @param personDif изменения человека
@@ -430,9 +477,9 @@ public class KeepDataHelper {
     /**
      * Удаляет людей, но оставляет мероприятие, даже если в нем нет участников
      */
-    public void deletePeopleButLeaveEvent(@NonNull List<Integer> ids) {
-        deletePeoplePictures(ids);
-        peopleTable.deletePerson(ids);
+    public void deletePeopleButLeaveEvent(@NonNull List<Integer> peopleIds) {
+        deletePeoplePictures(peopleIds);
+        peopleTable.deletePerson(peopleIds);
     }
 
     /**

@@ -14,6 +14,10 @@ public class EventInfo {
         this.participantsCount = participantsCount;
     }
 
+    public EventInfo(int id, String name, String participantsCount) {
+        this(id, name, Integer.parseInt(participantsCount));
+    }
+
     public int getId() {
         return id;
     }

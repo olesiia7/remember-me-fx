@@ -39,9 +39,9 @@
                             <VBox.margin>
                                 <Insets bottom="5.0" left="20.0" right="10.0" />
                             </VBox.margin>
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
+                            <padding>
+                                <Insets top="5.0" />
+                            </padding>
                         </HBox>
                         <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0">
                             <columns>
@@ -60,27 +60,42 @@
             </content>
         </Tab>
         <Tab fx:id="editEventsTab" text="Мероприятия">
-         <content>
-            <VBox prefHeight="200.0" prefWidth="100.0">
-               <children>
-                  <BorderPane>
+            <content>
+                <VBox prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <BorderPane>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                            </padding>
+                     <left>
+                                  <HBox spacing="5.0" BorderPane.alignment="CENTER">
+                                      <children>
+                                          <Button mnemonicParsing="false" onAction="#unselectAll" text="Снять все" />
+                                          <Button mnemonicParsing="false" onAction="#selectAll" text="Выбрать всех" />
+                                      </children>
+                                  </HBox>
+                     </left>
                      <right>
-                        <Button mnemonicParsing="false" onAction="#createNewEvent" text="Создать мероприятие" BorderPane.alignment="CENTER" />
+                                  <HBox spacing="5.0" BorderPane.alignment="CENTER">
+                                      <children>
+                                          <Button mnemonicParsing="false" onAction="#joinEvents" text="Переместить мероприятия" />
+                                          <Button mnemonicParsing="false" onAction="#createNewEvent" text="Создать мероприятие" />
+                                      </children>
+                                  </HBox>
                      </right>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                  </BorderPane>
-                  <TableView fx:id="tableEvents" prefHeight="415.0" prefWidth="751.0">
-                     <columns>
-                        <TableColumn fx:id="eventNameColumn" prefWidth="448.0" style="-fx-alignment: CENTER-LEFT;" text="Название" />
-                        <TableColumn fx:id="eventsCountColumn" prefWidth="111.0" style="-fx-alignment: CENTER;" text="Численность" />
-                        <TableColumn fx:id="eventEditColumn" minWidth="9.0" prefWidth="115.0" style="-fx-alignment: CENTER;" text="Редактировать" />
-                        <TableColumn fx:id="eventDeleteColumn" prefWidth="76.0" style="-fx-alignment: CENTER;" text="Удалить" />
-                     </columns>
-                  </TableView>
-               </children>
-            </VBox>
-         </content></Tab>
+                        </BorderPane>
+                        <TableView fx:id="tableEvents" prefHeight="415.0" prefWidth="751.0">
+                            <columns>
+                                <TableColumn fx:id="selectedColumn" prefWidth="33.0" style="-fx-alignment: CENTER;" />
+                                <TableColumn fx:id="eventNameColumn" prefWidth="448.0" style="-fx-alignment: CENTER-LEFT;" text="Название" />
+                                <TableColumn fx:id="eventsCountColumn" prefWidth="111.0" style="-fx-alignment: CENTER;" text="Численность" />
+                                <TableColumn fx:id="eventEditColumn" minWidth="9.0" prefWidth="115.0" style="-fx-alignment: CENTER;" text="Редактировать" />
+                                <TableColumn fx:id="eventDeleteColumn" prefWidth="76.0" style="-fx-alignment: CENTER;" text="Удалить" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </VBox>
+            </content>
+        </Tab>
     </tabs>
 </TabPane>
