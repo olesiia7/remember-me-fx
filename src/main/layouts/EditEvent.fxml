@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="751.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane>
@@ -66,7 +65,7 @@
             </HBox>
          </left>
       </BorderPane>
-      <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0">
+      <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0" VBox.vgrow="ALWAYS">
          <columns>
             <TableColumn fx:id="selectedColumn" prefWidth="33.0" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="picColumn" prefWidth="185.0" style="-fx-alignment: CENTER;" text="Изображение" />

@@ -20,15 +20,15 @@
     <columnConstraints>
         <ColumnConstraints />
         <ColumnConstraints />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="400.0" minWidth="10.0" prefWidth="162.0" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="400.0" minWidth="10.0" prefWidth="162.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="162.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="162.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints maxHeight="355.0" minHeight="10.0" prefHeight="355.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="258.0" minHeight="10.0" prefHeight="106.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="263.0" minHeight="10.0" prefHeight="106.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="167.0" minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="75.0" minHeight="2.0" prefHeight="35.0" vgrow="SOMETIMES" />
+        <RowConstraints maxHeight="355.0" minHeight="10.0" prefHeight="355.0" vgrow="ALWAYS" />
+        <RowConstraints maxHeight="258.0" minHeight="10.0" prefHeight="106.0" vgrow="NEVER" />
+        <RowConstraints minHeight="10.0" prefHeight="106.0" vgrow="ALWAYS" />
+        <RowConstraints maxHeight="167.0" minHeight="10.0" prefHeight="64.0" vgrow="NEVER" />
+        <RowConstraints maxHeight="75.0" minHeight="2.0" prefHeight="35.0" vgrow="NEVER" />
     </rowConstraints>
     <children>
         <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
@@ -81,10 +81,10 @@
                 <Insets left="10.0" right="10.0" top="5.0" />
             </GridPane.margin>
         </VBox>
-        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
+        <VBox fx:id="descriptionVBox" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2">
             <children>
                 <Label text="Описание" />
-                <TextArea fx:id="description" prefHeight="83.0" prefWidth="580.0">
+                <TextArea fx:id="description" prefWidth="580.0" VBox.vgrow="ALWAYS">
                     <VBox.margin>
                         <Insets />
                     </VBox.margin>
@@ -114,7 +114,7 @@
         </HBox>
         <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="2">
             <content>
-                <HBox fx:id="imageHBox" prefHeight="353.0" prefWidth="611.0" />
+                <HBox fx:id="imageHBox" minHeight="353.0" prefWidth="611.0" />
             </content>
         </ScrollPane>
     </children>

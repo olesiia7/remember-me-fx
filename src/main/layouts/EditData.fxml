@@ -43,7 +43,7 @@
                                 <Insets top="5.0" />
                             </padding>
                         </HBox>
-                        <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0">
+                        <TableView fx:id="tablePeople" prefHeight="415.0" prefWidth="751.0" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="picColumn" prefWidth="109.0" style="-fx-alignment: CENTER;" text="Изображение" />
                                 <TableColumn fx:id="nameColumn" prefWidth="123.0" style="-fx-alignment: CENTER-LEFT;" text="ФИО" />
@@ -84,7 +84,7 @@
                                   </HBox>
                      </right>
                         </BorderPane>
-                        <TableView fx:id="tableEvents" prefHeight="415.0" prefWidth="751.0">
+                        <TableView fx:id="tableEvents" prefHeight="415.0" prefWidth="751.0" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="selectedColumn" prefWidth="33.0" style="-fx-alignment: CENTER;" />
                                 <TableColumn fx:id="eventNameColumn" prefWidth="448.0" style="-fx-alignment: CENTER-LEFT;" text="Название" />
